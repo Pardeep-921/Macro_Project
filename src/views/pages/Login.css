@@ -81,7 +81,7 @@
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0px;
-  background: var(--primary-orange);
+  background: red;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

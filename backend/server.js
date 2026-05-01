@@ -239,8 +239,8 @@ app.post('/api/auth/register', authLimiter, validateRegistration, async (req, re
     const userRole = 'customer';
     const userStatus = 'pending';
 
-    // Check if user already exists
-    const existingUser = await getUserByUsername(email);
+    // Check if user already exists (use trimmed email, check both username and email columns)
+    const existingUser = await getUserByEmailOrUsername(userEmail);
     if (existingUser) {
       return res.status(400).json({ success: false, message: 'User with this email already exists.' });
     }
@@ -255,9 +255,10 @@ app.post('/api/auth/register', authLimiter, validateRegistration, async (req, re
     if (process.env.SMTP_USER && process.env.SMTP_PASS && process.env.ADMIN_EMAIL) {
       try {
         await transporter.sendMail({
-          from: `"Maco Project" <${process.env.SMTP_USER}>`,
+          from: `"${fullname}" <${process.env.SMTP_USER}>`,
+          replyTo: userEmail,
           to: process.env.ADMIN_EMAIL,
-          subject: 'New User Registration - Pending Approval',
+          subject: `New User Registration - ${fullname}`,
           text: `A new user has registered and is pending approval.\n\nName: ${fullname}\nEmail: ${userEmail}\n\nPlease login to the admin panel to approve or reject this request.`,
           html: `<p>A new user has registered and is pending approval.</p>
                  <ul>
