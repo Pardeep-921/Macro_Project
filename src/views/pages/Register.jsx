@@ -54,7 +54,7 @@ export default function Register() {
                             <img src={macoLogo} alt="MACO Logo" className="maco-logo-img" />
                             <h1 className="logo-text-large">MACO</h1>
                         </div>
-                        <span className="logo-sub-text">Regd. Trade Mark</span>
+
                     </div>
                 </header>
 

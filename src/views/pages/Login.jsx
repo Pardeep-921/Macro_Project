@@ -40,7 +40,7 @@ export default function Login() {
                             />
                             <h1 className="logo-text-large">MACO</h1>
                         </div>
-                        <span className="logo-sub-text">Regd. Trade Mark</span>
+
                     </div>
                 </header>
 
