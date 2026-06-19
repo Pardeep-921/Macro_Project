@@ -31,101 +31,100 @@ export default function Reporting() {
         fetchReports();
     }, []);
 
-    if (loading) return <div className="p-20 text-center">Crunching numbers...</div>;
+    const totalRevenue = salesData.reduce((sum, item) => sum + Number(item.totalRevenue || 0), 0);
+    const totalOrders = salesData.reduce((sum, item) => sum + Number(item.orderCount || 0), 0);
+    const totalChallans = supplyData.reduce((sum, item) => sum + Number(item.challanCount || 0), 0);
+
+    if (loading) {
+        return (
+            <div className="crm-page">
+                <PageHeader title="Advanced Analytics & Reporting" />
+                <div className="crm-shell">
+                    <div className="crm-loading">Crunching numbers...</div>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="reporting-container">
+        <div className="crm-page">
             <PageHeader title="Advanced Analytics & Reporting" />
-            
-            <div className="content-card">
-                <div className="card-body">
-                    <div className="section-header-bar" style={{ marginTop: 0 }}>Sales Performance (Last 6 Months)</div>
+            <div className="crm-shell">
+                <div className="crm-summary-grid">
+                    <article className="crm-summary-card tone-orange">
+                        <span>Total Revenue</span>
+                        <strong>Rs. {totalRevenue.toLocaleString()}</strong>
+                    </article>
+                    <article className="crm-summary-card tone-info">
+                        <span>Total Orders</span>
+                        <strong>{totalOrders}</strong>
+                    </article>
+                    <article className="crm-summary-card tone-success">
+                        <span>Challans Uploaded</span>
+                        <strong>{totalChallans}</strong>
+                    </article>
+                </div>
+
+                <section className="crm-panel">
+                    <div className="crm-panel-heading">
+                        <div>
+                            <span className="crm-kicker">Sales</span>
+                            <h2>Sales Performance (Last 6 Months)</h2>
+                        </div>
+                    </div>
                     <div className="report-grid">
                         {salesData.length === 0 ? (
-                            <p className="no-data">No sales data available for this period.</p>
+                            <div className="crm-empty">No sales data available for this period.</div>
                         ) : (
                             salesData.map(item => (
-                                <div key={item.month} className="glass-card stat-card">
-                                    <div className="stat-label">{item.month}</div>
-                                    <div className="stat-value">₹{parseFloat(item.totalRevenue || 0).toLocaleString()}</div>
-                                    <div className="stat-desc">{item.orderCount} Orders</div>
+                                <article key={item.month} className="report-card">
+                                    <div className="report-card-header">
+                                        <span>{item.month}</span>
+                                        <strong>Rs. {parseFloat(item.totalRevenue || 0).toLocaleString()}</strong>
+                                    </div>
+                                    <p>{item.orderCount} Orders</p>
                                     <div className="bar-container">
-                                        <div 
-                                            className="bar" 
+                                        <div
+                                            className="bar"
                                             style={{ width: `${Math.min(100, (item.totalRevenue / 100000) * 100)}%` }}
                                         ></div>
                                     </div>
-                                </div>
+                                </article>
                             ))
                         )}
                     </div>
+                </section>
 
-                    <div className="section-header-bar" style={{ marginTop: '40px' }}>Logistics Activity (Last 6 Months)</div>
+                <section className="crm-panel">
+                    <div className="crm-panel-heading">
+                        <div>
+                            <span className="crm-kicker">Logistics</span>
+                            <h2>Logistics Activity (Last 6 Months)</h2>
+                        </div>
+                    </div>
                     <div className="report-grid">
                         {supplyData.length === 0 ? (
-                            <p className="no-data">No supply data recorded yet.</p>
+                            <div className="crm-empty">No supply data recorded yet.</div>
                         ) : (
                             supplyData.map(item => (
-                                <div key={item.month} className="glass-card stat-card color-green">
-                                    <div className="stat-label">{item.month}</div>
-                                    <div className="stat-value">{item.challanCount}</div>
-                                    <div className="stat-desc">Challans Uploaded</div>
+                                <article key={item.month} className="report-card tone-green">
+                                    <div className="report-card-header">
+                                        <span>{item.month}</span>
+                                        <strong>{item.challanCount}</strong>
+                                    </div>
+                                    <p>Challans Uploaded</p>
                                     <div className="bar-container">
-                                        <div 
-                                            className="bar bg-green" 
+                                        <div
+                                            className="bar bg-green"
                                             style={{ width: `${Math.min(100, (item.challanCount / 20) * 100)}%` }}
                                         ></div>
                                     </div>
-                                </div>
+                                </article>
                             ))
                         )}
                     </div>
-                </div>
+                </section>
             </div>
-
-            <style dangerouslySetInnerHTML={{ __html: `
-                .report-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                    gap: 20px;
-                    margin-top: 20px;
-                }
-                .stat-card {
-                    padding: 20px;
-                    border-left: 4px solid var(--orange-primary);
-                }
-                .stat-card.color-green {
-                    border-left-color: #198754;
-                }
-                .stat-desc {
-                    font-size: 12px;
-                    color: #666;
-                    margin-bottom: 10px;
-                }
-                .bar-container {
-                    height: 8px;
-                    background: #eee;
-                    border-radius: 4px;
-                    overflow: hidden;
-                }
-                .bar {
-                    height: 100%;
-                    background: var(--orange-primary);
-                    transition: width 1s ease-in-out;
-                }
-                .bar.bg-green {
-                    background: #198754;
-                }
-                .no-data {
-                    grid-column: 1 / -1;
-                    padding: 40px;
-                    text-align: center;
-                    color: #999;
-                    background: #fdfdfd;
-                    border: 1px dashed #ccc;
-                    border-radius: 8px;
-                }
-            `}} />
         </div>
     );
 }

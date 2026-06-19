@@ -6,6 +6,8 @@ import { useCRMController } from '../../../controllers/CRMController';
 export default function ManageTasks() {
     const { tasks, loading, handleCreateTask } = useCRMController();
     const [formData, setFormData] = useState({ title: '', description: '', dueDate: '' });
+    const openTasks = tasks.filter(task => task.status !== 'Completed').length;
+    const datedTasks = tasks.filter(task => task.dueDate).length;
 
     const onSubmit = async (e) => {
         e.preventDefault();
@@ -18,17 +20,37 @@ export default function ManageTasks() {
     };
 
     return (
-        <div>
+        <div className="crm-page">
             <PageHeader title="Task Management" />
-            <div className="content-card">
-                <div className="card-body">
-                    <div className="section-header-bar" style={{ marginTop: 0 }}>Add New Task</div>
-                    <form onSubmit={onSubmit} style={{ marginTop: '20px' }}>
-                        <div className="form-grid">
+            <div className="crm-shell">
+                <div className="crm-summary-grid">
+                    <article className="crm-summary-card tone-orange">
+                        <span>Total Tasks</span>
+                        <strong>{tasks.length}</strong>
+                    </article>
+                    <article className="crm-summary-card tone-info">
+                        <span>Open Tasks</span>
+                        <strong>{openTasks}</strong>
+                    </article>
+                    <article className="crm-summary-card tone-success">
+                        <span>Scheduled</span>
+                        <strong>{datedTasks}</strong>
+                    </article>
+                </div>
+
+                <section className="crm-panel">
+                    <div className="crm-panel-heading">
+                        <div>
+                            <span className="crm-kicker">Task Entry</span>
+                            <h2>Add New Task</h2>
+                        </div>
+                    </div>
+                    <form className="crm-form" onSubmit={onSubmit}>
+                        <div className="form-grid crm-form-grid">
                             <div className="form-group">
                                 <label>Task Title</label>
                                 <input 
-                                    className="login-input" 
+                                    className="responsive-input" 
                                     value={formData.title} 
                                     onChange={e => setFormData({...formData, title: e.target.value})} 
                                     required 
@@ -38,7 +60,7 @@ export default function ManageTasks() {
                                 <label>Due Date</label>
                                 <input 
                                     type="date" 
-                                    className="login-input" 
+                                    className="responsive-input" 
                                     value={formData.dueDate} 
                                     onChange={e => setFormData({...formData, dueDate: e.target.value})} 
                                 />
@@ -46,39 +68,43 @@ export default function ManageTasks() {
                             <div className="form-group full-width">
                                 <label>Description</label>
                                 <textarea 
-                                    className="login-input" 
+                                    className="responsive-input" 
                                     value={formData.description} 
                                     onChange={e => setFormData({...formData, description: e.target.value})} 
                                 />
                             </div>
                         </div>
-                        <div className="btn-group">
+                        <div className="crm-actions">
                             <button type="submit" className="btn btn-primary">Create Task</button>
                         </div>
                     </form>
+                </section>
 
-                    <div className="section-header-bar">My Tasks</div>
-                    <div style={{ marginTop: '20px' }}>
-                        {loading ? <p>Loading tasks...</p> : tasks.length === 0 ? <p>No tasks found.</p> : (
-                            <div className="task-list">
-                                {tasks.map(task => (
-                                    <div key={task.id} className="glass-card" style={{ marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <div>
-                                            <div style={{ fontWeight: '700', fontSize: '15px' }}>{task.title}</div>
-                                            <div style={{ fontSize: '12px', color: '#666' }}>{task.description}</div>
-                                        </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div className="badge badge-pending">{task.status}</div>
-                                            <div style={{ fontSize: '11px', marginTop: '5px', color: '#888' }}>
-                                                Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                <section className="crm-panel">
+                    <div className="crm-panel-heading">
+                        <div>
+                            <span className="crm-kicker">Work List</span>
+                            <h2>My Tasks</h2>
+                        </div>
+                        <span className="crm-count">{tasks.length} Records</span>
                     </div>
-                </div>
+                    {loading ? <div className="crm-loading">Loading tasks...</div> : tasks.length === 0 ? <div className="crm-empty">No tasks found.</div> : (
+                        <div className="crm-task-list">
+                            {tasks.map(task => (
+                                <article key={task.id} className="crm-task-card">
+                                    <div className="crm-task-main">
+                                        <h3>{task.title}</h3>
+                                        <p>{task.description || 'No description added.'}</p>
+                                    </div>
+                                    <div className="crm-task-meta">
+                                        <div className="badge badge-pending">{task.status}</div>
+                                        <span>Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No date'}</span>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    )}
+                </section>
             </div>
         </div>
     );

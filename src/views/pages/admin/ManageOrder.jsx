@@ -10,6 +10,10 @@ export default function ManageOrder() {
     const [orderDetails, setOrderDetails] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
 
+    const pendingCount = orders.filter(order => order.status === 'Pending').length;
+    const acceptedCount = orders.filter(order => order.status === 'Accepted').length;
+    const totalAmount = orders.reduce((sum, order) => sum + (Number(order.amount) || 0), 0);
+
     const columns = [
         { key: 'orderNo', header: 'OrderNo' },
         { key: 'customer', header: 'Customer Name' },
@@ -47,35 +51,75 @@ export default function ManageOrder() {
     };
 
     return (
-        <div>
+        <div className="order-supply-page">
             <PageHeader title="Manage Order" />
-            <div className="content-card">
-                <div className="card-body">
-                    <SearchForm title="Search Order Criteria">
-                        <div className="form-group">
-                            <label>Customer Name</label>
-                            <select defaultValue="--Select--">
-                                <option disabled>--Select--</option>
-                                {companies.map(c => <option key={c.companyId} value={c.companyId}>{c.name}</option>)}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label>Order No</label>
-                            <input type="text" />
-                        </div>
-                    </SearchForm>
+            <div className="order-supply-shell">
+                <div className="order-supply-hero">
+                    <div>
+                        <span className="order-supply-kicker">Orders & Supply</span>
+                        <h2>Order Info</h2>
+                    </div>
+                    <div className="order-supply-record-pill">
+                        <strong>{loading ? '...' : orders.length}</strong>
+                        <span>Total Records</span>
+                    </div>
+                </div>
 
-                    <div className="total-record">Total Record: {loading ? '...' : orders.length}</div>
+                <div className="order-supply-stats">
+                    <div className="order-supply-stat tone-warning">
+                        <span>Pending Orders</span>
+                        <strong>{loading ? '...' : pendingCount}</strong>
+                    </div>
+                    <div className="order-supply-stat tone-success">
+                        <span>Accepted Orders</span>
+                        <strong>{loading ? '...' : acceptedCount}</strong>
+                    </div>
+                    <div className="order-supply-stat tone-info">
+                        <span>Net Amount</span>
+                        <strong>{loading ? '...' : `Rs. ${totalAmount.toLocaleString('en-IN')}`}</strong>
+                    </div>
+                </div>
 
-                    <div className="section-header-bar">Order Details</div>
+                <div className="order-supply-panel">
+                    <div className="order-supply-panel-heading">
+                        <div>
+                            <span className="order-supply-kicker">Filter</span>
+                            <h3>Search Order Criteria</h3>
+                        </div>
+                    </div>
+                    <div className="order-supply-form">
+                        <SearchForm title="Search Order Criteria">
+                            <div className="form-group">
+                                <label>Customer Name</label>
+                                <select defaultValue="--Select--">
+                                    <option disabled>--Select--</option>
+                                    {companies.map(c => <option key={c.companyId} value={c.companyId}>{c.name}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Order No</label>
+                                <input type="text" />
+                            </div>
+                        </SearchForm>
+                    </div>
+                </div>
+
+                <div className="order-supply-panel order-supply-table-panel">
+                    <div className="order-supply-panel-heading">
+                        <div>
+                            <span className="order-supply-kicker">Records</span>
+                            <h3>Order Details</h3>
+                        </div>
+                        <span className="order-supply-count">Total Record: {loading ? '...' : orders.length}</span>
+                    </div>
                     {loading ? (
-                        <div style={{ padding: '20px', textAlign: 'center' }}>Loading...</div>
+                        <div className="order-supply-loading">Loading...</div>
                     ) : (
-                        <DataTable 
-                            columns={columns} 
-                            data={orders} 
-                            actions={['View', 'Approve', 'Reject']} 
-                            onAction={handleAction} 
+                        <DataTable
+                            columns={columns}
+                            data={orders}
+                            actions={['View', 'Approve', 'Reject']}
+                            onAction={handleAction}
                         />
                     )}
 

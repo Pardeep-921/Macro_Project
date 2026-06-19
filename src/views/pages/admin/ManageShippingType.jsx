@@ -1,9 +1,9 @@
-import React from 'react';
-import PageHeader from '../../components/PageHeader';
-import FormButtons from '../../components/FormButtons';
-import DataTable from '../../components/DataTable';
+import React, { useState } from 'react';
+import MasterDataPage from '../../components/MasterDataPage';
 
 export default function ManageShippingType() {
+    const [name, setName] = useState('');
+
     const columns = [
         { key: 'id', header: 'Shipping ID' },
         { key: 'name', header: 'Shipping Method Name' },
@@ -17,33 +17,38 @@ export default function ManageShippingType() {
         { id: '5', name: 'SAURASHTRA ROADWAYS' },
     ];
 
+    const onSave = (e) => {
+        e.preventDefault();
+        setName('');
+    };
+
     return (
-        <div>
-            <PageHeader title="Manage Shipping Type" />
-            <div className="content-card">
-                <div className="card-body">
-                    <div className="section-header-bar" style={{ marginTop: 0 }}>Manage Shipping Type</div>
-                    <form style={{ marginTop: '15px' }}>
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label>Enter the Shipping Type:</label>
-                                <input type="text" className="responsive-input" />
-                            </div>
-                        </div>
-                        <div className="btn-group">
-                            <button type="button" className="btn btn-primary">Save</button>
-                            <button type="button" className="btn btn-secondary">Reset</button>
-                        </div>
-                    </form>
-
-                    <div className="section-header-bar">Shipping Details</div>
-                    <DataTable columns={columns} data={data} actions={['Delete']} />
-
-                    <div className="mt-10 text-center" style={{ color: '#555', fontStyle: 'italic' }}>
-                        Manage Shipping Type Section is use to Add /Edit or Delete Shipping Type.
-                    </div>
-                </div>
+        <MasterDataPage
+            title="Item Shipping"
+            description="Maintain transporter and shipping method names used while preparing supply and dispatch records."
+            formTitle="Add Shipping Type"
+            formHint="Shipping data is currently shown from local sample records."
+            onSubmit={onSave}
+            primaryAction="Save Shipping Type"
+            secondaryAction={{ label: 'Reset', onClick: () => setName('') }}
+            tableTitle="Shipping Details"
+            tableHint="Use consistent transporter names to keep dispatch reporting clean."
+            columns={columns}
+            data={data}
+            actions={['Delete']}
+            stats={[{ label: 'Data Source', value: 'Sample' }]}
+        >
+            <div className="form-group">
+                <label className="required-label">Shipping Type <span className="required">*</span></label>
+                <input
+                    type="text"
+                    className="login-input"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Example: SAI GOODS CARRIER"
+                    required
+                />
             </div>
-        </div>
+        </MasterDataPage>
     );
 }

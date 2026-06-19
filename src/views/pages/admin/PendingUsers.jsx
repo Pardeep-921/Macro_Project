@@ -1,31 +1,56 @@
-// NEW FILE: src/views/pages/admin/PendingUsers.jsx
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AuthModel } from '../../../models/AuthModel';
 import { useAuth } from '../../../context/useAuth';
+import './PendingUsers.css';
 
-// Status badge styling
-const STATUS_STYLES = {
-    pending:  { background: '#fff3cd', color: '#856404', border: '1px solid #ffc107' },
-    approved: { background: '#d1e7dd', color: '#0a3622', border: '1px solid #198754' },
-    rejected: { background: '#f8d7da', color: '#58151c', border: '1px solid #dc3545' },
+const FILTERS = [
+    { key: 'all', label: 'All' },
+    { key: 'pending', label: 'Pending' },
+    { key: 'approved', label: 'Approved' },
+    { key: 'rejected', label: 'Rejected' },
+];
+
+const STATUS_LABELS = {
+    pending: 'Pending',
+    approved: 'Approved',
+    rejected: 'Rejected',
+};
+
+const formatDate = (value) => {
+    if (!value) return '-';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+
+    return date.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+    });
+};
+
+const getInitials = (name = '') => {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return 'U';
+
+    return parts.slice(0, 2).map(part => part[0]).join('').toUpperCase();
 };
 
 export default function PendingUsers() {
     const { user } = useAuth();
-    const [users, setUsers]       = useState([]);
-    const [loading, setLoading]   = useState(true);
-    const [error, setError]       = useState('');
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
     const [actionMsg, setActionMsg] = useState('');
-    // 'all' | 'pending' | 'approved' | 'rejected'
-    const [filter, setFilter]     = useState('pending');
+    const [actionTone, setActionTone] = useState('success');
+    const [filter, setFilter] = useState('pending');
 
-    // ── Fetch all customer registrations ──────────────────────────────────────
     const fetchUsers = useCallback(async () => {
         setLoading(true);
         setError('');
         try {
             const data = await AuthModel.getPendingUsers(user?.token);
-            setUsers(data);
+            setUsers(Array.isArray(data) ? data : []);
         } catch (err) {
             setError(err.message || 'Failed to load users');
         } finally {
@@ -33,200 +58,202 @@ export default function PendingUsers() {
         }
     }, [user?.token]);
 
-    useEffect(() => { fetchUsers(); }, [fetchUsers]);
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
 
-    // ── Approve ───────────────────────────────────────────────────────────────
+    const updateUserStatus = (id, status) => {
+        setUsers(prev => prev.map(item => (
+            item.id === id ? { ...item, status } : item
+        )));
+    };
+
     const handleApprove = async (id, email) => {
         setActionMsg('');
         try {
             await AuthModel.approveUser(id, user?.token);
-            setActionMsg(`✅ ${email} approved successfully.`);
-            // Refresh list
-            setUsers(prev => prev.map(u => u.id === id ? { ...u, status: 'approved' } : u));
+            setActionTone('success');
+            setActionMsg(`${email} has been approved successfully.`);
+            updateUserStatus(id, 'approved');
         } catch (err) {
-            setActionMsg(`❌ ${err.message}`);
+            setActionTone('danger');
+            setActionMsg(err.message || 'Failed to approve user.');
         }
     };
 
-    // ── Reject ────────────────────────────────────────────────────────────────
-    const handleReject = async (id, email) => {
+    const handleReject = async (id, email, wasApproved = false) => {
         setActionMsg('');
         try {
             await AuthModel.rejectUser(id, user?.token);
-            setActionMsg(`🚫 ${email} rejected.`);
-            setUsers(prev => prev.map(u => u.id === id ? { ...u, status: 'rejected' } : u));
+            setActionTone(wasApproved ? 'warning' : 'danger');
+            setActionMsg(wasApproved ? `${email} access has been revoked.` : `${email} has been rejected.`);
+            updateUserStatus(id, 'rejected');
         } catch (err) {
-            setActionMsg(`❌ ${err.message}`);
+            setActionTone('danger');
+            setActionMsg(err.message || 'Failed to reject user.');
         }
     };
 
-    // ── Filtered list ─────────────────────────────────────────────────────────
-    const displayed = filter === 'all' ? users : users.filter(u => u.status === filter);
+    const counts = useMemo(() => ({
+        all: users.length,
+        pending: users.filter(item => item.status === 'pending').length,
+        approved: users.filter(item => item.status === 'approved').length,
+        rejected: users.filter(item => item.status === 'rejected').length,
+    }), [users]);
 
-    // ── Counts for filter tabs ─────────────────────────────────────────────────
-    const counts = {
-        all:      users.length,
-        pending:  users.filter(u => u.status === 'pending').length,
-        approved: users.filter(u => u.status === 'approved').length,
-        rejected: users.filter(u => u.status === 'rejected').length,
-    };
+    const displayed = useMemo(() => (
+        filter === 'all' ? users : users.filter(item => item.status === filter)
+    ), [filter, users]);
 
     return (
-        <div style={{ padding: '24px', fontFamily: 'inherit' }}>
-            {/* ── Header ── */}
-            <div style={{ marginBottom: '24px' }}>
-                <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 700 }}>
-                    User Registration Requests
-                </h2>
-                <p style={{ margin: '6px 0 0', color: '#666', fontSize: '14px' }}>
-                    Approve or reject customer registration requests.
-                </p>
-            </div>
-
-            {/* ── Action feedback ── */}
-            {actionMsg && (
-                <div style={{
-                    padding: '10px 16px', borderRadius: '6px', marginBottom: '16px',
-                    background: actionMsg.startsWith('✅') ? '#d1e7dd' : actionMsg.startsWith('🚫') ? '#fff3cd' : '#f8d7da',
-                    color: '#333', fontSize: '14px', fontWeight: '600'
-                }}>
-                    {actionMsg}
-                </div>
-            )}
-
-            {/* ── Error ── */}
-            {error && (
-                <div style={{ padding: '10px 16px', borderRadius: '6px', marginBottom: '16px', background: '#f8d7da', color: '#58151c', fontSize: '14px' }}>
-                    {error}
-                </div>
-            )}
-
-            {/* ── Filter tabs ── */}
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                {['all', 'pending', 'approved', 'rejected'].map(tab => (
+        <section className="approvals-page">
+            <div className="approvals-shell">
+                <header className="approvals-hero">
+                    <div>
+                        <span className="approvals-eyebrow">Administration</span>
+                        <h1>User Registration Requests</h1>
+                        <p>Review customer access requests and keep account permissions up to date.</p>
+                    </div>
                     <button
-                        key={tab}
-                        onClick={() => setFilter(tab)}
-                        style={{
-                            padding: '6px 18px', borderRadius: '20px', border: '1px solid #ccc',
-                            cursor: 'pointer', fontSize: '13px', fontWeight: filter === tab ? 700 : 400,
-                            background: filter === tab ? '#343a40' : '#fff',
-                            color: filter === tab ? '#fff' : '#333',
-                            textTransform: 'capitalize',
-                        }}
+                        className="approvals-refresh"
+                        type="button"
+                        onClick={fetchUsers}
+                        disabled={loading}
                     >
-                        {tab} ({counts[tab]})
+                        {loading ? 'Refreshing...' : 'Refresh'}
                     </button>
-                ))}
-                <button
-                    onClick={fetchUsers}
-                    style={{
-                        marginLeft: 'auto', padding: '6px 18px', borderRadius: '20px',
-                        border: '1px solid #0d6efd', background: '#0d6efd', color: '#fff',
-                        cursor: 'pointer', fontSize: '13px', fontWeight: 600
-                    }}
-                >
-                    ↻ Refresh
-                </button>
-            </div>
+                </header>
 
-            {/* ── Table ── */}
-            {loading ? (
-                <p style={{ color: '#666' }}>Loading...</p>
-            ) : displayed.length === 0 ? (
-                <p style={{ color: '#888', fontSize: '14px' }}>
-                    No {filter === 'all' ? '' : filter} registrations found.
-                </p>
-            ) : (
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-                        <thead>
-                            <tr style={{ background: '#f5f5f5', textAlign: 'left' }}>
-                                {['Full Name', 'Email', 'Role', 'Status', 'Registered On', 'Actions'].map(h => (
-                                    <th key={h} style={{ padding: '10px 14px', borderBottom: '2px solid #dee2e6', whiteSpace: 'nowrap' }}>
-                                        {h}
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {displayed.map((u, idx) => (
-                                <tr
-                                    key={u.id}
-                                    style={{ background: idx % 2 === 0 ? '#fff' : '#fafafa', verticalAlign: 'middle' }}
-                                >
-                                    <td style={{ padding: '10px 14px', borderBottom: '1px solid #dee2e6' }}>
-                                        {u.fullname || '—'}
-                                    </td>
-                                    <td style={{ padding: '10px 14px', borderBottom: '1px solid #dee2e6' }}>
-                                        {u.email || u.username}
-                                    </td>
-                                    <td style={{ padding: '10px 14px', borderBottom: '1px solid #dee2e6', textTransform: 'capitalize' }}>
-                                        {u.role}
-                                    </td>
-                                    <td style={{ padding: '10px 14px', borderBottom: '1px solid #dee2e6' }}>
-                                        <span style={{
-                                            ...STATUS_STYLES[u.status],
-                                            padding: '3px 10px', borderRadius: '12px',
-                                            fontSize: '12px', fontWeight: 600, textTransform: 'capitalize'
-                                        }}>
-                                            {u.status}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '10px 14px', borderBottom: '1px solid #dee2e6', whiteSpace: 'nowrap', color: '#666' }}>
-                                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN', {
-                                            day: '2-digit', month: 'short', year: 'numeric'
-                                        }) : '—'}
-                                    </td>
-                                    <td style={{ padding: '10px 14px', borderBottom: '1px solid #dee2e6' }}>
-                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                            {/* Approve button — only show if not already approved */}
-                                            {u.status !== 'approved' && (
-                                                <button
-                                                    onClick={() => handleApprove(u.id, u.email || u.username)}
-                                                    style={{
-                                                        padding: '5px 14px', borderRadius: '5px', border: 'none',
-                                                        background: '#198754', color: '#fff', cursor: 'pointer',
-                                                        fontSize: '13px', fontWeight: 600
-                                                    }}
-                                                >
-                                                    Approve
-                                                </button>
-                                            )}
-                                            {/* Reject button — only show if not already rejected */}
-                                            {u.status !== 'rejected' && (
-                                                <button
-                                                    onClick={() => handleReject(u.id, u.email || u.username)}
-                                                    style={{
-                                                        padding: '5px 14px', borderRadius: '5px', border: 'none',
-                                                        background: '#dc3545', color: '#fff', cursor: 'pointer',
-                                                        fontSize: '13px', fontWeight: 600
-                                                    }}
-                                                >
-                                                    Reject
-                                                </button>
-                                            )}
-                                            {u.status === 'approved' && (
-                                                <button
-                                                    onClick={() => handleReject(u.id, u.email || u.username)}
-                                                    style={{
-                                                        padding: '5px 14px', borderRadius: '5px',
-                                                        border: '1px solid #dc3545', background: '#fff',
-                                                        color: '#dc3545', cursor: 'pointer',
-                                                        fontSize: '13px', fontWeight: 600
-                                                    }}
-                                                >
-                                                    Revoke
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                <div className="approvals-stat-grid" aria-label="Registration request summary">
+                    {FILTERS.map(item => (
+                        <button
+                            key={item.key}
+                            className={`approvals-stat-card ${filter === item.key ? 'active' : ''}`}
+                            type="button"
+                            onClick={() => setFilter(item.key)}
+                        >
+                            <span>{item.label}</span>
+                            <strong>{counts[item.key]}</strong>
+                        </button>
+                    ))}
                 </div>
-            )}
-        </div>
+
+                {(actionMsg || error) && (
+                    <div className={`approvals-alert ${error ? 'danger' : actionTone}`}>
+                        <strong>{error ? 'Unable to complete request' : 'Update complete'}</strong>
+                        <span>{error || actionMsg}</span>
+                    </div>
+                )}
+
+                <div className="approvals-panel">
+                    <div className="approvals-panel-header">
+                        <div>
+                            <h2>{FILTERS.find(item => item.key === filter)?.label} Requests</h2>
+                            <p>{displayed.length} registration{displayed.length === 1 ? '' : 's'} shown</p>
+                        </div>
+                        <div className="approvals-filter-tabs" role="tablist" aria-label="Filter registrations">
+                            {FILTERS.map(item => (
+                                <button
+                                    key={item.key}
+                                    className={filter === item.key ? 'active' : ''}
+                                    type="button"
+                                    onClick={() => setFilter(item.key)}
+                                >
+                                    {item.label}
+                                    <span>{counts[item.key]}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {loading ? (
+                        <div className="approvals-state">
+                            <span className="approvals-spinner" aria-hidden="true"></span>
+                            Loading registration requests...
+                        </div>
+                    ) : displayed.length === 0 ? (
+                        <div className="approvals-empty">
+                            <strong>No {filter === 'all' ? '' : filter} registrations found</strong>
+                            <span>New customer requests will appear here when they are submitted.</span>
+                        </div>
+                    ) : (
+                        <div className="approvals-table-wrap">
+                            <table className="approvals-table">
+                                <thead>
+                                    <tr>
+                                        <th>Applicant</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th>Registered On</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {displayed.map(item => {
+                                        const name = item.fullname || 'Unnamed User';
+                                        const email = item.email || item.username || '-';
+                                        const status = item.status || 'pending';
+
+                                        return (
+                                            <tr key={item.id}>
+                                                <td>
+                                                    <div className="approvals-user">
+                                                        <span className="approvals-avatar">{getInitials(name)}</span>
+                                                        <div>
+                                                            <strong>{name}</strong>
+                                                            <span>ID #{item.id}</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="approvals-email">{email}</td>
+                                                <td className="approvals-role">{item.role || '-'}</td>
+                                                <td>
+                                                    <span className={`approvals-status ${status}`}>
+                                                        {STATUS_LABELS[status] || status}
+                                                    </span>
+                                                </td>
+                                                <td className="approvals-date">{formatDate(item.createdAt)}</td>
+                                                <td>
+                                                    <div className="approvals-actions">
+                                                        {status !== 'approved' && (
+                                                            <button
+                                                                className="approve"
+                                                                type="button"
+                                                                onClick={() => handleApprove(item.id, email)}
+                                                            >
+                                                                Approve
+                                                            </button>
+                                                        )}
+                                                        {status !== 'rejected' && (
+                                                            <button
+                                                                className="reject"
+                                                                type="button"
+                                                                onClick={() => handleReject(item.id, email)}
+                                                            >
+                                                                Reject
+                                                            </button>
+                                                        )}
+                                                        {status === 'approved' && (
+                                                            <button
+                                                                className="revoke"
+                                                                type="button"
+                                                                onClick={() => handleReject(item.id, email, true)}
+                                                            >
+                                                                Revoke
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </section>
     );
 }

@@ -1,38 +1,94 @@
 import React, { useState } from 'react';
 import PageHeader from '../../components/PageHeader';
-import ProductDetailModal from '../../components/ProductDetailModal';
 import Product from '../../components/Product';
 import { useNavigate } from 'react-router-dom';
+import { SAVED_MARKETPLACE_ITEMS_KEY, getSavedMarketplaceItems, staticProducts } from '../../../data/marketplaceProducts';
 import './product-catalog.css';
 
-const staticProducts = [
-    { id: 'p1', name: 'Industrial Spare Part 1', imageUrl: '/product-images/WhatsApp Image 2026-04-08 at 1.45.35 PM.jpeg', specifications: 'High durability, precision engineered' },
-    { id: 'p2', name: 'Industrial Spare Part 2', imageUrl: '/product-images/WhatsApp Image 2026-04-08 at 1.45.36 PM (1).jpeg', specifications: 'Corrosion resistant material' },
-    { id: 'p3', name: 'Industrial Spare Part 3', imageUrl: '/product-images/WhatsApp Image 2026-04-08 at 1.45.36 PM (2).jpeg', specifications: 'Heavy duty construction' },
-    { id: 'p4', name: 'Industrial Spare Part 4', imageUrl: '/product-images/WhatsApp Image 2026-04-08 at 1.45.36 PM.jpeg', specifications: 'Standard sizing for universal fit' },
-    { id: 'p5', name: 'Industrial Spare Part 5', imageUrl: '/product-images/WhatsApp Image 2026-04-08 at 1.45.37 PM (1).jpeg', specifications: 'Premium quality finish' },
-    { id: 'p6', name: 'Industrial Spare Part 6', imageUrl: '/product-images/WhatsApp Image 2026-04-08 at 1.45.37 PM (2).jpeg', specifications: 'Tested for extreme conditions' },
-    { id: 'p7', name: 'Industrial Spare Part 7', imageUrl: '/product-images/WhatsApp Image 2026-04-08 at 1.45.37 PM.jpeg', specifications: 'Easy to install' },
-    { id: 'p8', name: 'Industrial Spare Part 8', imageUrl: '/product-images/WhatsApp Image 2026-04-08 at 1.45.38 PM (1).jpeg', specifications: 'Lightweight but strong' },
-    { id: 'p9', name: 'Industrial Spare Part 9', imageUrl: '/product-images/WhatsApp Image 2026-04-08 at 1.45.38 PM (2).jpeg', specifications: 'ISO certified manufacturing' },
-    { id: 'p10', name: 'Industrial Spare Part 10', imageUrl: '/product-images/WhatsApp Image 2026-04-08 at 1.45.39 PM (1).jpeg', specifications: 'Long life cycle' },
-    { id: 'p11', name: 'Industrial Spare Part 11', imageUrl: '/product-images/WhatsApp Image 2026-04-08 at 1.45.39 PM.jpeg', specifications: 'Cost-effective replacement' }
-];
+const blankItemForm = {
+    name: '',
+    description: '',
+    category: '',
+    rate: '',
+    uom: 'Piece',
+    supplierName: '',
+    location: '',
+    phone: '',
+    imageUrl: ''
+};
 
 export default function ProductCatalog() {
-    // Overriding the fetched products with static images from public directory
-    const products = staticProducts;
-    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [savedItems, setSavedItems] = useState(getSavedMarketplaceItems);
+    const [isAddItemOpen, setIsAddItemOpen] = useState(false);
+    const [formData, setFormData] = useState(blankItemForm);
+    const [imageFileName, setImageFileName] = useState('');
     const navigate = useNavigate();
+    const products = [...savedItems, ...staticProducts];
 
     const handleViewDetails = (product) => {
         const pathPrefix = window.location.pathname.startsWith('/admin') ? '/admin' : '/customer';
         navigate(`${pathPrefix}/product/${product.id}`);
     };
 
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleImageUpload = (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            setFormData(prev => ({ ...prev, imageUrl: reader.result }));
+            setImageFileName(file.name);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const closeAddItemModal = () => {
+        setIsAddItemOpen(false);
+        setFormData(blankItemForm);
+        setImageFileName('');
+    };
+
+    const handleSaveItem = (event) => {
+        event.preventDefault();
+
+        const newItem = {
+            id: `local-${Date.now()}`,
+            name: formData.name.trim(),
+            description: formData.description.trim(),
+            specifications: formData.description.trim(),
+            category: formData.category.trim() || 'Marketplace Item',
+            rate: Number(formData.rate) || 0,
+            uom: formData.uom.trim() || 'Piece',
+            supplierName: formData.supplierName.trim() || 'Maco Automotive',
+            location: formData.location.trim(),
+            phone: formData.phone.trim(),
+            imageUrl: formData.imageUrl || 'https://via.placeholder.com/300x200?text=Industrial+Part'
+        };
+
+        const nextItems = [newItem, ...savedItems];
+        setSavedItems(nextItems);
+        localStorage.setItem(SAVED_MARKETPLACE_ITEMS_KEY, JSON.stringify(nextItems));
+        closeAddItemModal();
+    };
+
     return (
         <div className="product-catalog-container">
             <PageHeader title="Industrial Spare Parts Marketplace" />
+
+            <div className="catalog-toolbar">
+                <div>
+                    <p className="catalog-kicker">Product Marketplace</p>
+                    <h2>Add and manage spare parts directly from this screen</h2>
+                </div>
+                <button className="catalog-add-btn" onClick={() => setIsAddItemOpen(true)}>
+                    + Add Item
+                </button>
+            </div>
             
             <div className="product-grid">
                 {products.map(product => (
@@ -46,6 +102,91 @@ export default function ProductCatalog() {
                     <div className="no-products-msg">No products found in the marketplace.</div>
                 )}
             </div>
+
+            {isAddItemOpen && (
+                <div className="catalog-modal-overlay" onClick={closeAddItemModal}>
+                    <form className="catalog-add-modal" onSubmit={handleSaveItem} onClick={event => event.stopPropagation()}>
+                        <div className="catalog-modal-header">
+                            <div>
+                                <p className="catalog-kicker">New Marketplace Item</p>
+                                <h3>Add Item</h3>
+                            </div>
+                            <button type="button" className="catalog-modal-close" onClick={closeAddItemModal} aria-label="Close add item form">
+                                &times;
+                            </button>
+                        </div>
+
+                        <div className="catalog-form-grid">
+                            <label className="catalog-field">
+                                <span>Item Name</span>
+                                <input name="name" type="text" value={formData.name} onChange={handleChange} required />
+                            </label>
+
+                            <label className="catalog-field">
+                                <span>Category</span>
+                                <input name="category" type="text" value={formData.category} onChange={handleChange} placeholder="Industrial spare part" />
+                            </label>
+
+                            <label className="catalog-field">
+                                <span>Rate</span>
+                                <input name="rate" type="number" min="0" step="0.01" value={formData.rate} onChange={handleChange} />
+                            </label>
+
+                            <label className="catalog-field">
+                                <span>Unit</span>
+                                <select name="uom" value={formData.uom} onChange={handleChange}>
+                                    <option value="Piece">Piece</option>
+                                    <option value="Set">Set</option>
+                                    <option value="Kg">Kg</option>
+                                    <option value="Meter">Meter</option>
+                                    <option value="Box">Box</option>
+                                </select>
+                            </label>
+
+                            <label className="catalog-field catalog-field-wide">
+                                <span>Description of Item</span>
+                                <textarea name="description" value={formData.description} onChange={handleChange} rows="4" required />
+                            </label>
+
+                            <label className="catalog-field">
+                                <span>Supplier Name</span>
+                                <input name="supplierName" type="text" value={formData.supplierName} onChange={handleChange} />
+                            </label>
+
+                            <label className="catalog-field">
+                                <span>Location</span>
+                                <input name="location" type="text" value={formData.location} onChange={handleChange} />
+                            </label>
+
+                            <label className="catalog-field">
+                                <span>Phone</span>
+                                <input name="phone" type="tel" value={formData.phone} onChange={handleChange} />
+                            </label>
+
+                            <label className="catalog-field catalog-upload-field">
+                                <span>Item Image</span>
+                                <input type="file" accept="image/*" onChange={handleImageUpload} />
+                                <small>{imageFileName || 'Upload JPG, PNG, or WebP image'}</small>
+                            </label>
+                        </div>
+
+                        {formData.imageUrl && (
+                            <div className="catalog-image-preview">
+                                <img src={formData.imageUrl} alt="Selected item preview" />
+                            </div>
+                        )}
+
+                        <div className="catalog-modal-actions">
+                            <button type="button" className="catalog-cancel-btn" onClick={closeAddItemModal}>
+                                Cancel
+                            </button>
+                            <button type="submit" className="catalog-save-btn">
+                                Save Item
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
         </div>
     );
 }

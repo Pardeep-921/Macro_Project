@@ -19,17 +19,18 @@ export default function DataTable({ columns, data, actions, onAction }) {
                         <tr key={rowIndex}>
                             {actions && actions.map((action, i) => (
                                 <td key={`action-${i}`}>
-                                    <span 
+                                    <button
+                                        type="button"
                                         className="action-link" 
                                         onClick={() => onAction && onAction(action, row)}
                                         style={{ cursor: 'pointer', color: action === 'Reject' ? '#cc3333' : 'var(--orange-primary)' }}
                                     >
-                                        [{action}]
-                                    </span>
+                                        {action}
+                                    </button>
                                 </td>
                             ))}
                             {columns.map((col, colIndex) => (
-                                <td key={colIndex}>{row[col.key]}</td>
+                                <td key={colIndex}>{col.render ? col.render(row) : row[col.key]}</td>
                             ))}
                         </tr>
                     ))}

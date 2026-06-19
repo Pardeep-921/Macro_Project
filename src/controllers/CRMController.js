@@ -91,6 +91,7 @@ export const useCRMController = () => {
         error,
         handleCreateLead,
         handleConvertLead,
+        handleCreateTask,
         handleCreateDeal,
         refresh: fetchData
     };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProductController } from '../../../controllers/ProductController';
 import PageHeader from '../../components/PageHeader';
+import { getSavedMarketplaceItems, staticProducts } from '../../../data/marketplaceProducts';
 import './product-detail.css';
 
 export default function ProductDetail() {
@@ -14,10 +15,9 @@ export default function ProductDetail() {
     const [message, setMessage] = useState('');
 
     useEffect(() => {
-        if (products.length > 0) {
-            const found = products.find(p => p.id.toString() === id);
-            setProduct(found);
-        }
+        const marketplaceProducts = [...getSavedMarketplaceItems(), ...staticProducts, ...products];
+        const found = marketplaceProducts.find(p => p.id.toString() === id);
+        setProduct(found || null);
     }, [products, id]);
 
     const handleAddToCart = () => {
@@ -39,7 +39,7 @@ export default function ProductDetail() {
         }, 1500);
     };
 
-    if (loading) return <div className="text-center mt-20">Loading Product Details...</div>;
+    if (loading && !product) return <div className="text-center mt-20">Loading Product Details...</div>;
     if (!product && !loading) return <div className="text-center mt-20">Product not found.</div>;
 
     return (
@@ -58,7 +58,7 @@ export default function ProductDetail() {
                 </div>
 
                 <div className="product-info-section">
-                    <span className="product-category-tag">{product.category}</span>
+                    <span className="product-category-tag">{product.category || product.categoryName || 'Marketplace Item'}</span>
                     <h1 className="product-name-title">{product.name}</h1>
                     
                     <div className="product-price-box">
@@ -69,7 +69,7 @@ export default function ProductDetail() {
 
                     <div className="product-description-content">
                         <h3>Product Description</h3>
-                        <p>{product.description || 'No detailed description available for this industrial part.'}</p>
+                        <p>{product.description || product.specifications || 'No detailed description available for this industrial part.'}</p>
                     </div>
 
                     <div className="supplier-dashboard-card">

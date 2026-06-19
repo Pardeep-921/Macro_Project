@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Backend",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "cwd": "${workspaceFolder}/backend",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Launch Frontend",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch Both",
+      "configurations": ["Launch Backend", "Launch Frontend"],
+      "presentation": {
+        "order": 1
+      }
+    }
+  ]
+}

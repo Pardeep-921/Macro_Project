@@ -39,7 +39,7 @@ export default function UploadChallanDetails() {
     const onSubmit = async (e) => {
         e.preventDefault();
         if (!formData.companyId) return alert('Please select a company');
-        
+
         const res = await handleUploadChallan(formData);
         if (res.success) {
             alert('Challan uploaded successfully!');
@@ -53,13 +53,30 @@ export default function UploadChallanDetails() {
     };
 
     return (
-        <div>
+        <div className="order-supply-page">
             <PageHeader title="Upload Challan Details" />
-            <div className="content-card">
-                <div className="card-body">
-                    <form onSubmit={onSubmit}>
-                        <div className="section-header-bar" style={{ marginTop: 0 }}>Challan Basic Info</div>
-                        <div className="form-grid" style={{ marginTop: '15px' }}>
+            <div className="order-supply-shell">
+                <div className="order-supply-hero">
+                    <div>
+                        <span className="order-supply-kicker">Orders & Supply</span>
+                        <h2>Upload Challan</h2>
+                    </div>
+                    <div className="order-supply-record-pill">
+                        <strong>{formData.items.length}</strong>
+                        <span>Line Items</span>
+                    </div>
+                </div>
+
+                <form onSubmit={onSubmit} className="order-supply-panel order-supply-form-panel">
+                    <div className="order-supply-panel-heading">
+                        <div>
+                            <span className="order-supply-kicker">Challan</span>
+                            <h3>Challan Basic Info</h3>
+                        </div>
+                    </div>
+
+                    <div className="order-supply-form">
+                        <div className="form-grid">
                             <div className="form-group">
                                 <label>Challan No</label>
                                 <input name="challanNo" type="text" className="login-input" required value={formData.challanNo} onChange={handleChange} />
@@ -76,38 +93,44 @@ export default function UploadChallanDetails() {
                                 <input name="challanDate" type="date" className="login-input" required value={formData.challanDate} onChange={handleChange} />
                             </div>
                         </div>
+                    </div>
 
-                        <div className="section-header-bar">Challan Items</div>
-                        <div className="mt-10">
-                            {formData.items.map((item, index) => (
-                                <div key={index} className="form-grid" style={{ marginBottom: '10px', borderBottom: '1px solid #eee', paddingBottom: '10px', alignItems: 'flex-end' }}>
-                                    <div className="form-group">
-                                        <label>Item Name</label>
-                                        <input name="itemName" type="text" className="login-input" value={item.itemName} onChange={(e) => handleItemChange(index, e)} required />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Quantity</label>
-                                        <input name="quantity" type="number" className="login-input" value={item.quantity} onChange={(e) => handleItemChange(index, e)} required />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>UOM</label>
-                                        <div style={{ display: 'flex', gap: '10px' }}>
-                                            <input name="uom" type="text" className="login-input" value={item.uom} onChange={(e) => handleItemChange(index, e)} />
-                                            {formData.items.length > 1 && (
-                                                <button type="button" className="btn btn-danger" onClick={() => removeItem(index)} style={{ padding: '5px 10px' }}>✕</button>
-                                            )}
-                                        </div>
+                    <div className="order-supply-panel-heading order-supply-subheading">
+                        <div>
+                            <span className="order-supply-kicker">Items</span>
+                            <h3>Challan Items</h3>
+                        </div>
+                    </div>
+
+                    <div className="order-supply-form order-supply-items">
+                        {formData.items.map((item, index) => (
+                            <div key={index} className="order-supply-item-row form-grid">
+                                <div className="form-group">
+                                    <label>Item Name</label>
+                                    <input name="itemName" type="text" className="login-input" value={item.itemName} onChange={(e) => handleItemChange(index, e)} required />
+                                </div>
+                                <div className="form-group">
+                                    <label>Quantity</label>
+                                    <input name="quantity" type="number" className="login-input" value={item.quantity} onChange={(e) => handleItemChange(index, e)} required />
+                                </div>
+                                <div className="form-group">
+                                    <label>UOM</label>
+                                    <div className="order-supply-inline-action">
+                                        <input name="uom" type="text" className="login-input" value={item.uom} onChange={(e) => handleItemChange(index, e)} />
+                                        {formData.items.length > 1 && (
+                                            <button type="button" className="btn btn-danger order-supply-icon-btn" onClick={() => removeItem(index)} aria-label="Remove item">X</button>
+                                        )}
                                     </div>
                                 </div>
-                            ))}
-                            <button type="button" className="btn btn-secondary" onClick={addItem}>+ Add More Item</button>
-                        </div>
+                            </div>
+                        ))}
+                        <button type="button" className="btn btn-secondary" onClick={addItem}>+ Add More Item</button>
+                    </div>
 
-                        <div className="btn-group mt-20">
-                            <button type="submit" className="btn btn-primary">Upload Challan Details</button>
-                        </div>
-                    </form>
-                </div>
+                    <div className="order-supply-actions">
+                        <button type="submit" className="btn btn-primary">Upload Challan Details</button>
+                    </div>
+                </form>
             </div>
         </div>
     );

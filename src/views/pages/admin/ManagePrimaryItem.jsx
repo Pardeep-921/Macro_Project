@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import PageHeader from '../../components/PageHeader';
-import DataTable from '../../components/DataTable';
+import MasterDataPage from '../../components/MasterDataPage';
 import { useMasterDataController } from '../../../controllers/MasterDataController';
 
 export default function ManagePrimaryItem() {
@@ -23,48 +22,42 @@ export default function ManagePrimaryItem() {
     ];
 
     return (
-        <div>
-            <PageHeader title="Manage Primary Item Master" />
-            <div className="content-card">
-                <div className="card-body">
-                    <div className="section-header-bar" style={{ marginTop: 0 }}>Add New Primary Group</div>
-                    <form onSubmit={onSave} style={{ marginTop: '15px' }}>
-                        <div className="form-grid">
-                            <div className="form-group">
-                                <label className="required-label">Primary Group Name <span className="required">*</span></label>
-                                <input 
-                                    type="text" 
-                                    className="login-input" 
-                                    value={formData.name}
-                                    onChange={e => setFormData({...formData, name: e.target.value})}
-                                    required 
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Description</label>
-                                <textarea 
-                                    className="login-input" 
-                                    value={formData.desc}
-                                    onChange={e => setFormData({...formData, desc: e.target.value})}
-                                />
-                            </div>
-                        </div>
-                        <div className="btn-group">
-                            <button type="submit" className="btn btn-primary">Save Primary Group</button>
-                        </div>
-                    </form>
-
-                    <div className="section-header-bar">Existing Primary Groups</div>
-                    {loading ? <p>Loading...</p> : (
-                        <DataTable 
-                            columns={columns} 
-                            data={items} 
-                            actions={['Delete']} 
-                            onAction={(action, row) => action === 'Delete' && handleDelete(row.id)} 
-                        />
-                    )}
-                </div>
+        <MasterDataPage
+            title="Primary Item Master"
+            description="Maintain the top-level product groups used across item creation, cataloging, and reporting."
+            formTitle="Add Primary Group"
+            formHint="Create a clear parent group before mapping sub groups and items."
+            onSubmit={onSave}
+            primaryAction="Save Primary Group"
+            tableTitle="Existing Primary Groups"
+            tableHint="Primary groups define the first level of the item hierarchy."
+            columns={columns}
+            data={items}
+            loading={loading}
+            actions={['Delete']}
+            onAction={(action, row) => action === 'Delete' && handleDelete(row.id)}
+            stats={[{ label: 'Required Fields', value: '1' }]}
+        >
+            <div className="form-group">
+                <label className="required-label">Primary Group Name <span className="required">*</span></label>
+                <input
+                    type="text"
+                    className="login-input"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Example: Bags"
+                    required
+                />
             </div>
-        </div>
+            <div className="form-group full-width">
+                <label>Description</label>
+                <textarea
+                    className="login-input"
+                    value={formData.desc}
+                    onChange={e => setFormData({ ...formData, desc: e.target.value })}
+                    placeholder="Optional notes for this product group"
+                />
+            </div>
+        </MasterDataPage>
     );
 }

@@ -9,6 +9,8 @@ export default function ManageLeads() {
     const [formData, setFormData] = useState({ name: '', email: '', phone: '', status: 'New' });
     const [convertId, setConvertId] = useState(null);
     const [conversionData, setConversionData] = useState({ dealName: '', amount: '' });
+    const activeLeads = leads.filter(l => l.status !== 'Converted');
+    const convertedLeads = leads.filter(l => l.status === 'Converted').length;
 
     const columns = [
         { key: 'name', header: 'Lead Name' },
@@ -52,13 +54,33 @@ export default function ManageLeads() {
     };
 
     return (
-        <div>
+        <div className="crm-page">
             <PageHeader title="Lead Management" />
-            <div className="content-card">
-                <div className="card-body">
-                    <div className="section-header-bar" style={{ marginTop: 0 }}>Add New Lead</div>
-                    <form style={{ marginTop: '20px' }} onSubmit={onSubmit}>
-                        <div className="form-grid">
+            <div className="crm-shell">
+                <div className="crm-summary-grid">
+                    <article className="crm-summary-card tone-orange">
+                        <span>Total Leads</span>
+                        <strong>{leads.length}</strong>
+                    </article>
+                    <article className="crm-summary-card tone-info">
+                        <span>Active Leads</span>
+                        <strong>{activeLeads.length}</strong>
+                    </article>
+                    <article className="crm-summary-card tone-success">
+                        <span>Converted</span>
+                        <strong>{convertedLeads}</strong>
+                    </article>
+                </div>
+
+                <section className="crm-panel">
+                    <div className="crm-panel-heading">
+                        <div>
+                            <span className="crm-kicker">Lead Entry</span>
+                            <h2>Add New Lead</h2>
+                        </div>
+                    </div>
+                    <form className="crm-form" onSubmit={onSubmit}>
+                        <div className="form-grid crm-form-grid">
                             <div className="form-group">
                                 <label className="required-label">Lead Name <span className="required">*</span></label>
                                 <input name="name" type="text" className="responsive-input" required value={formData.name} onChange={handleChange} />
@@ -81,45 +103,58 @@ export default function ManageLeads() {
                                 </select>
                             </div>
                         </div>
-                        <div className="btn-group">
+                        <div className="crm-actions">
                             <button type="submit" className="btn btn-primary">Save Lead</button>
                         </div>
                     </form>
+                </section>
 
-                    {convertId && (
-                        <div style={{ padding: '20px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6', marginTop: '20px' }}>
-                            <h4 style={{ margin: '0 0 15px' }}>Convert Lead to Deal</h4>
-                            <form onSubmit={handleConvertSubmit}>
-                                <div className="form-grid">
-                                    <div className="form-group">
-                                        <label>Deal Name</label>
-                                        <input type="text" value={conversionData.dealName} onChange={e => setConversionData({...conversionData, dealName: e.target.value})} required className="responsive-input" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>Expected Amount</label>
-                                        <input type="number" value={conversionData.amount} onChange={e => setConversionData({...conversionData, amount: e.target.value})} required className="responsive-input" />
-                                    </div>
-                                </div>
-                                <div className="btn-group">
-                                    <button type="submit" className="btn btn-primary">Proceed Conversion</button>
-                                    <button type="button" className="btn btn-secondary" onClick={() => setConvertId(null)}>Cancel</button>
-                                </div>
-                            </form>
+                {convertId && (
+                    <section className="crm-panel crm-conversion-panel">
+                        <div className="crm-panel-heading">
+                            <div>
+                                <span className="crm-kicker">Pipeline</span>
+                                <h2>Convert Lead to Deal</h2>
+                            </div>
                         </div>
-                    )}
+                        <form className="crm-form" onSubmit={handleConvertSubmit}>
+                            <div className="form-grid crm-form-grid">
+                                <div className="form-group">
+                                    <label>Deal Name</label>
+                                    <input type="text" value={conversionData.dealName} onChange={e => setConversionData({...conversionData, dealName: e.target.value})} required className="responsive-input" />
+                                </div>
+                                <div className="form-group">
+                                    <label>Expected Amount</label>
+                                    <input type="number" value={conversionData.amount} onChange={e => setConversionData({...conversionData, amount: e.target.value})} required className="responsive-input" />
+                                </div>
+                            </div>
+                            <div className="crm-actions">
+                                <button type="submit" className="btn btn-primary">Proceed Conversion</button>
+                                <button type="button" className="btn btn-secondary" onClick={() => setConvertId(null)}>Cancel</button>
+                            </div>
+                        </form>
+                    </section>
+                )}
 
-                    <div className="section-header-bar">Active Leads</div>
-                    <div style={{ marginTop: '10px' }}>
-                        {loading ? <p>Loading leads...</p> : (
+                <section className="crm-panel crm-table-panel">
+                    <div className="crm-panel-heading">
+                        <div>
+                            <span className="crm-kicker">Lead List</span>
+                            <h2>Active Leads</h2>
+                        </div>
+                        <span className="crm-count">{activeLeads.length} Records</span>
+                    </div>
+                    {loading ? <div className="crm-loading">Loading leads...</div> : (
+                        <div className="crm-table-scroll">
                             <DataTable 
                                 columns={columns} 
-                                data={leads.filter(l => l.status !== 'Converted')} 
+                                data={activeLeads} 
                                 actions={['Convert']} 
                                 onAction={onAction} 
                             />
-                        )}
-                    </div>
-                </div>
+                        </div>
+                    )}
+                </section>
             </div>
         </div>
     );
