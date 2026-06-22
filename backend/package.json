@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "npx nodemon server.js",
-    "test": "node --test ./test/api.test.js"
+    "test": "node --test --test-concurrency=1 ./test/api.test.js ./test/phase6.qa.test.js",
+    "test:phase6": "node --test ./test/phase6.qa.test.js",
+    "audit:phase6": "node ./scripts/audit-phase-6.js"
   },
   "keywords": [],
   "author": "",

@@ -8,10 +8,14 @@ export const AuthProvider = ({ children }) => {
       if (!storedUser) return null;
       
       const parsed = JSON.parse(storedUser);
-      // Normalize 'user' role to 'customer' for compatibility and to prevent loops
-      if (parsed && parsed.role === 'user') {
-          parsed.role = 'customer';
-          localStorage.setItem('maco_user', JSON.stringify(parsed));
+      const normalizedRole = String(parsed?.role || '').toLowerCase();
+      if (parsed && (normalizedRole === 'user' || normalizedRole === 'customer')) {
+        parsed.role = 'customer';
+        localStorage.setItem('maco_user', JSON.stringify(parsed));
+      }
+      if (parsed && normalizedRole === 'admin') {
+        parsed.role = 'admin';
+        localStorage.setItem('maco_user', JSON.stringify(parsed));
       }
       return parsed;
     } catch (e) {
@@ -19,8 +23,13 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  const login = React.useCallback((role, token) => {
-    const userData = { isAuthenticated: true, role, token };
+  const login = React.useCallback((sessionOrRole, legacyToken) => {
+    const session =
+      typeof sessionOrRole === 'object'
+        ? sessionOrRole
+        : { role: sessionOrRole, token: legacyToken };
+    const role = String(session.role || '').toLowerCase() === 'admin' ? 'admin' : 'customer';
+    const userData = { isAuthenticated: true, ...session, role };
     setUser(userData);
     localStorage.setItem('maco_user', JSON.stringify(userData));
   }, []);

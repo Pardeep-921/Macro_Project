@@ -35,6 +35,21 @@ export default function Reporting() {
     const totalOrders = salesData.reduce((sum, item) => sum + Number(item.orderCount || 0), 0);
     const totalChallans = supplyData.reduce((sum, item) => sum + Number(item.challanCount || 0), 0);
 
+    const downloadExport = async (type) => {
+        const token = JSON.parse(localStorage.getItem('maco_user'))?.token;
+        const response = await fetch(apiUrl(`/api/exports/${type}`), {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) return alert('Export failed');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `maco_${type}_${new Date().toISOString().split('T')[0]}.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+    };
+
     if (loading) {
         return (
             <div className="crm-page">
@@ -71,6 +86,7 @@ export default function Reporting() {
                             <span className="crm-kicker">Sales</span>
                             <h2>Sales Performance (Last 6 Months)</h2>
                         </div>
+                        <button type="button" className="btn btn-secondary" onClick={() => downloadExport('orders')}>Export Orders</button>
                     </div>
                     <div className="report-grid">
                         {salesData.length === 0 ? (
@@ -100,6 +116,10 @@ export default function Reporting() {
                         <div>
                             <span className="crm-kicker">Logistics</span>
                             <h2>Logistics Activity (Last 6 Months)</h2>
+                        </div>
+                        <div className="btn-group">
+                            <button type="button" className="btn btn-secondary" onClick={() => downloadExport('supplies')}>Export Supplies</button>
+                            <button type="button" className="btn btn-secondary" onClick={() => downloadExport('catalog')}>Export Catalog</button>
                         </div>
                     </div>
                     <div className="report-grid">

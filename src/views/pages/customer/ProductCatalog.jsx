@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import PageHeader from '../../components/PageHeader';
 import Product from '../../components/Product';
 import { useNavigate } from 'react-router-dom';
+import { useProductController } from '../../../controllers/ProductController';
 import { SAVED_MARKETPLACE_ITEMS_KEY, getSavedMarketplaceItems, staticProducts } from '../../../data/marketplaceProducts';
 import './product-catalog.css';
 
@@ -22,8 +23,9 @@ export default function ProductCatalog() {
     const [isAddItemOpen, setIsAddItemOpen] = useState(false);
     const [formData, setFormData] = useState(blankItemForm);
     const [imageFileName, setImageFileName] = useState('');
+    const { products: apiProducts, loading } = useProductController();
     const navigate = useNavigate();
-    const products = [...savedItems, ...staticProducts];
+    const products = [...apiProducts, ...savedItems, ...staticProducts];
 
     const handleViewDetails = (product) => {
         const pathPrefix = window.location.pathname.startsWith('/admin') ? '/admin' : '/customer';
@@ -91,9 +93,12 @@ export default function ProductCatalog() {
             </div>
             
             <div className="product-grid">
-                {products.map(product => (
+                {loading && (
+                    <div className="no-products-msg">Loading catalog...</div>
+                )}
+                {products.map((product, index) => (
                     <Product 
-                        key={product.id} 
+                        key={`${product.item_code || product.id}-${index}`} 
                         product={product} 
                         onViewDetails={handleViewDetails} 
                     />

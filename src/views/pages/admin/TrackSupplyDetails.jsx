@@ -3,6 +3,8 @@ import PageHeader from '../../components/PageHeader';
 import SearchForm from '../../components/SearchForm';
 import DataTable from '../../components/DataTable';
 import { useSupplyController } from '../../../controllers/SupplyController';
+import { apiUrl } from '../../../config/api';
+import { PDFService } from '../../../services/PDFService';
 
 export default function TrackSupplyDetails() {
     const { supplies, companies, loading, searchSupplies } = useSupplyController();
@@ -17,12 +19,27 @@ export default function TrackSupplyDetails() {
 
     const columns = [
         { key: 'challanNo', header: 'Challan No' },
-        { key: 'companyId', header: 'Company' },
+        { key: 'orderNo', header: 'Order No' },
+        { key: 'companyName', header: 'Company' },
+        { key: 'carrierName', header: 'Carrier' },
         { key: 'challanDate', header: 'Challan Date' },
-        { key: 'itemName', header: 'Item Name' },
-        { key: 'quantity', header: 'Quantity' },
-        { key: 'uom', header: 'UOM' }
+        { key: 'supplyDetails', header: 'Supply Details' }
     ];
+
+    const downloadExport = async () => {
+        const token = JSON.parse(localStorage.getItem('maco_user'))?.token;
+        const response = await fetch(apiUrl('/api/exports/supplies'), {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!response.ok) return alert('Export failed');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `maco_supplies_${new Date().toISOString().split('T')[0]}.xlsx`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+    };
 
     return (
         <div className="order-supply-page">
@@ -94,6 +111,7 @@ export default function TrackSupplyDetails() {
                             </div>
                             <div className="order-supply-search-actions">
                                 <button type="submit" className="btn btn-primary">Search Supplies</button>
+                                <button type="button" className="btn btn-secondary" onClick={downloadExport}>Export List</button>
                             </div>
                         </SearchForm>
                     </form>
@@ -110,7 +128,14 @@ export default function TrackSupplyDetails() {
                         {loading ? (
                             <div className="order-supply-loading">Loading...</div>
                         ) : (
-                            <DataTable columns={columns} data={supplies} actions={[]} onAction={() => {}} />
+                            <DataTable
+                                columns={columns}
+                                data={supplies}
+                                actions={['PDF']}
+                                onAction={(action, row) => {
+                                    if (action === 'PDF') PDFService.generateChallan(row);
+                                }}
+                            />
                         )}
                     </div>
                 </div>

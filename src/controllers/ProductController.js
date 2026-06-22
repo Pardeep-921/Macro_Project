@@ -72,13 +72,16 @@ export const useProductController = () => {
             .filter(sh => sh.qty > 0)
             .map(sh => ({
                 id: product.id,
+                item_id: product.item_id || product.id,
                 name: product.name,
                 category: product.category,
                 size: sh.size,
+                size_id: sh.size_id || product.item_size_id,
+                item_size_id: product.item_size_id,
                 qty: parseInt(sh.qty),
-                price: product.rate,
+                price: Number(product.rate || product.list_price || 0),
                 uom: product.uom,
-                total: parseInt(sh.qty) * product.rate,
+                total: parseInt(sh.qty) * Number(product.rate || product.list_price || 0),
                 cartId: `${product.id}-${sh.size}-${Date.now()}`
             }));
 

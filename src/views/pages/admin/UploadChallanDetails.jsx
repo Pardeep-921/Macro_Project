@@ -1,52 +1,56 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PageHeader from '../../components/PageHeader';
 import { useSupplyController } from '../../../controllers/SupplyController';
+import { apiUrl } from '../../../config/api';
 
 export default function UploadChallanDetails() {
-    const { companies, handleUploadChallan } = useSupplyController();
+    const { handleUploadChallan } = useSupplyController();
+    const [orders, setOrders] = useState([]);
+    const [carriers, setCarriers] = useState([]);
     const [formData, setFormData] = useState({
         challanNo: '',
-        companyId: '',
+        orderNo: '',
+        carrierId: '',
         challanDate: new Date().toISOString().split('T')[0],
-        items: [{ itemName: '', quantity: '', uom: '' }]
+        supplyDetails: ''
     });
+
+    useEffect(() => {
+        const loadDispatchMasters = async () => {
+            const token = JSON.parse(localStorage.getItem('maco_user'))?.token;
+            const headers = { Authorization: `Bearer ${token}` };
+            const [orderRes, carrierRes] = await Promise.all([
+                fetch(apiUrl('/api/orders'), { headers }),
+                fetch(apiUrl('/api/shipping-carriers'), { headers })
+            ]);
+            const orderData = orderRes.ok ? await orderRes.json() : [];
+            const carrierData = carrierRes.ok ? await carrierRes.json() : [];
+            setOrders(orderData.filter(order => order.order_status === 'ACCEPTED' || order.status === 'Accepted'));
+            setCarriers(carrierData);
+        };
+        loadDispatchMasters().catch(err => console.error('Failed to load challan masters:', err));
+    }, []);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleItemChange = (index, e) => {
-        const newItems = [...formData.items];
-        newItems[index][e.target.name] = e.target.value;
-        setFormData({ ...formData, items: newItems });
-    };
-
-    const addItem = () => {
-        setFormData({
-            ...formData,
-            items: [...formData.items, { itemName: '', quantity: '', uom: '' }]
-        });
-    };
-
-    const removeItem = (index) => {
-        if (formData.items.length === 1) return;
-        setFormData({
-            ...formData,
-            items: formData.items.filter((_, i) => i !== index)
-        });
-    };
-
     const onSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.companyId) return alert('Please select a company');
+        if (!formData.orderNo) return alert('Please select an accepted order');
+        if (!formData.carrierId) return alert('Please select a shipping carrier');
 
         const res = await handleUploadChallan(formData);
         if (res.success) {
             alert('Challan uploaded successfully!');
             setFormData({
-                challanNo: '', companyId: '', challanDate: new Date().toISOString().split('T')[0],
-                items: [{ itemName: '', quantity: '', uom: '' }]
+                challanNo: '',
+                orderNo: '',
+                carrierId: '',
+                challanDate: new Date().toISOString().split('T')[0],
+                supplyDetails: ''
             });
+            setOrders(orders.filter(order => order.orderNo !== formData.orderNo));
         } else {
             alert(res.message);
         }
@@ -62,8 +66,8 @@ export default function UploadChallanDetails() {
                         <h2>Upload Challan</h2>
                     </div>
                     <div className="order-supply-record-pill">
-                        <strong>{formData.items.length}</strong>
-                        <span>Line Items</span>
+                        <strong>{orders.length}</strong>
+                        <span>Accepted Orders</span>
                     </div>
                 </div>
 
@@ -82,10 +86,14 @@ export default function UploadChallanDetails() {
                                 <input name="challanNo" type="text" className="login-input" required value={formData.challanNo} onChange={handleChange} />
                             </div>
                             <div className="form-group">
-                                <label>Company Name</label>
-                                <select name="companyId" className="login-input" value={formData.companyId} onChange={handleChange} required>
-                                    <option value="">--Select Company--</option>
-                                    {companies.map(c => <option key={c.companyId} value={c.companyId}>{c.name}</option>)}
+                                <label>Accepted Order</label>
+                                <select name="orderNo" className="login-input" value={formData.orderNo} onChange={handleChange} required>
+                                    <option value="">--Select Order--</option>
+                                    {orders.map(order => (
+                                        <option key={order.orderNo} value={order.orderNo}>
+                                            {order.orderNo} - {order.customer} - Rs. {Number(order.amount || 0).toLocaleString('en-IN')}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                             <div className="form-group">
@@ -93,38 +101,19 @@ export default function UploadChallanDetails() {
                                 <input name="challanDate" type="date" className="login-input" required value={formData.challanDate} onChange={handleChange} />
                             </div>
                         </div>
-                    </div>
-
-                    <div className="order-supply-panel-heading order-supply-subheading">
-                        <div>
-                            <span className="order-supply-kicker">Items</span>
-                            <h3>Challan Items</h3>
-                        </div>
-                    </div>
-
-                    <div className="order-supply-form order-supply-items">
-                        {formData.items.map((item, index) => (
-                            <div key={index} className="order-supply-item-row form-grid">
-                                <div className="form-group">
-                                    <label>Item Name</label>
-                                    <input name="itemName" type="text" className="login-input" value={item.itemName} onChange={(e) => handleItemChange(index, e)} required />
-                                </div>
-                                <div className="form-group">
-                                    <label>Quantity</label>
-                                    <input name="quantity" type="number" className="login-input" value={item.quantity} onChange={(e) => handleItemChange(index, e)} required />
-                                </div>
-                                <div className="form-group">
-                                    <label>UOM</label>
-                                    <div className="order-supply-inline-action">
-                                        <input name="uom" type="text" className="login-input" value={item.uom} onChange={(e) => handleItemChange(index, e)} />
-                                        {formData.items.length > 1 && (
-                                            <button type="button" className="btn btn-danger order-supply-icon-btn" onClick={() => removeItem(index)} aria-label="Remove item">X</button>
-                                        )}
-                                    </div>
-                                </div>
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label>Shipping Carrier</label>
+                                <select name="carrierId" className="login-input" value={formData.carrierId} onChange={handleChange} required>
+                                    <option value="">--Select Carrier--</option>
+                                    {carriers.map(carrier => <option key={carrier.id} value={carrier.id}>{carrier.name}</option>)}
+                                </select>
                             </div>
-                        ))}
-                        <button type="button" className="btn btn-secondary" onClick={addItem}>+ Add More Item</button>
+                            <div className="form-group">
+                                <label>Supply Details</label>
+                                <textarea name="supplyDetails" className="login-input" rows="3" value={formData.supplyDetails} onChange={handleChange} placeholder="Boxes, LR number, dispatch notes" />
+                            </div>
+                        </div>
                     </div>
 
                     <div className="order-supply-actions">

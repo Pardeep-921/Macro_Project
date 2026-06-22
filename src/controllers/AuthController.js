@@ -24,7 +24,13 @@ export const useAuthController = () => {
                         ? '/admin/dashboard'
                         : '/customer/dashboard';
 
-                login(response.role, response.token);
+                login({
+                    role: response.role,
+                    roleMaster: response.roleMaster,
+                    username: response.username,
+                    companyIdCode: response.companyIdCode,
+                    token: response.token
+                });
 
                 setEmail('');
                 setPassword('');

@@ -1193,7 +1193,9 @@ fieldset legend {
   color: var(--text-required);
 }
 
-.company-field input {
+.company-field input,
+.company-field select,
+.company-search-row input {
   width: 100%;
   min-height: 40px;
   padding: 8px 11px;
@@ -1206,12 +1208,19 @@ fieldset legend {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.company-field input:focus {
+.company-field select {
+  appearance: none;
+}
+
+.company-field input:focus,
+.company-field select:focus,
+.company-search-row input:focus {
   border-color: var(--orange-primary);
   box-shadow: 0 0 0 3px rgba(227, 122, 34, 0.14);
 }
 
-.company-field input::placeholder {
+.company-field input::placeholder,
+.company-search-row input::placeholder {
   color: #9a9a9a;
 }
 
@@ -1252,6 +1261,10 @@ fieldset legend {
 
 .company-table-panel {
   padding-bottom: 20px;
+}
+
+.company-search-row {
+  padding: 0 20px;
 }
 
 .company-table-panel .data-table-wrapper {

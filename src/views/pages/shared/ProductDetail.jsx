@@ -15,16 +15,18 @@ export default function ProductDetail() {
     const [message, setMessage] = useState('');
 
     useEffect(() => {
-        const marketplaceProducts = [...getSavedMarketplaceItems(), ...staticProducts, ...products];
+        const marketplaceProducts = [...products, ...getSavedMarketplaceItems(), ...staticProducts];
         const found = marketplaceProducts.find(p => p.id.toString() === id);
         setProduct(found || null);
     }, [products, id]);
 
     const handleAddToCart = () => {
         if (!product) return;
-        // The current addToCart expects an array of selections [{size, qty}]
-        // For simple buy, we'll pass a default size if not available or just adjust the controller
-        addToCart(product, [{ size: 'Default', qty: quantity }]);
+        addToCart(product, [{
+            size: product.size || product.size_code || 'STD',
+            size_id: product.item_size_id,
+            qty: quantity
+        }]);
         setMessage('Product added to cart successfully!');
         setTimeout(() => setMessage(''), 3000);
     };

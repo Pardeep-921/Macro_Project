@@ -3,6 +3,7 @@ import PageHeader from '../../components/PageHeader';
 import SearchForm from '../../components/SearchForm';
 import DataTable from '../../components/DataTable';
 import { useOrderController } from '../../../controllers/OrderController';
+import { PDFService } from '../../../services/PDFService';
 
 export default function ManageOrder() {
     const { orders, loading, companies, approveOrders, rejectOrders, updateOrder, fetchOrderDetails } = useOrderController();
@@ -48,6 +49,11 @@ export default function ManageOrder() {
             setOrderDetails(null);
             setSelectedOrder(null);
         } else alert(res.message);
+    };
+
+    const handleInvoiceDownload = () => {
+        if (!orderDetails || !selectedOrder) return;
+        PDFService.generateInvoice(selectedOrder, orderDetails.items);
     };
 
     return (
@@ -150,9 +156,7 @@ export default function ManageOrder() {
                                                 >
                                                     <option value="Pending">Pending</option>
                                                     <option value="Accepted">Accepted</option>
-                                                    <option value="Processing">Processing</option>
-                                                    <option value="Shipped">Shipped</option>
-                                                    <option value="Delivered">Delivered</option>
+                                                    <option value="Dispatched">Dispatched</option>
                                                     <option value="Rejected">Rejected</option>
                                                 </select>
                                             </div>
@@ -179,6 +183,9 @@ export default function ManageOrder() {
                                             </div>
                                             <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '10px' }} disabled={isUpdating}>
                                                 {isUpdating ? 'Saving...' : 'Update Order'}
+                                            </button>
+                                            <button type="button" className="btn btn-secondary" style={{ width: '100%', marginTop: '10px' }} onClick={handleInvoiceDownload}>
+                                                Download Invoice PDF
                                             </button>
                                         </form>
                                     </div>

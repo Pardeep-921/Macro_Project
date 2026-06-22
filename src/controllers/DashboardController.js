@@ -13,10 +13,11 @@ export const useDashboardController = () => {
     const fetchDashboardData = async () => {
         setLoading(true);
         try {
-            const [orders, companyData, users] = await Promise.all([
+            const [orders, companyData, users, dashboardStats] = await Promise.all([
                 OrderModel.getDraftOrders(),
                 CompanyModel.getCompanies(),
-                AuthModel.getPendingUsers(user?.token).catch(() => [])
+                AuthModel.getPendingUsers(user?.token).catch(() => []),
+                OrderModel.getDashboardStats()
             ]);
 
             const newStats = orders.reduce((acc, order) => {
@@ -29,6 +30,13 @@ export const useDashboardController = () => {
                 if (status === 'rejected') acc.rejected++;
                 return acc;
             }, { pending: 0, accepted: 0, rejected: 0, pendingUsers: 0, revenue: 0 });
+
+            if (dashboardStats) {
+                newStats.pending = dashboardStats.pending || 0;
+                newStats.accepted = dashboardStats.accepted || 0;
+                newStats.rejected = dashboardStats.rejected || 0;
+                newStats.revenue = dashboardStats.revenue || 0;
+            }
 
             newStats.pendingUsers = users.filter(u => u.status === 'pending').length;
 

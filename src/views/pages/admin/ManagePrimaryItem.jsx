@@ -2,17 +2,24 @@ import React, { useState } from 'react';
 import MasterDataPage from '../../components/MasterDataPage';
 import { useMasterDataController } from '../../../controllers/MasterDataController';
 
+const initialFormData = { id: '', name: '', desc: '' };
+
 export default function ManagePrimaryItem() {
-    // Note: We use 'PrimaryItems' as the key, though it requires a backend endpoint.
-    // I'll ensure the backend has /api/primary-items.
-    const { data: items, loading, handleSave, handleDelete } = useMasterDataController('PrimaryItems');
-    const [formData, setFormData] = useState({ name: '', desc: '' });
+    const { data: items, loading, handleSave, handleDelete, refresh } = useMasterDataController('PrimaryGroups');
+    const [formData, setFormData] = useState(initialFormData);
+    const [search, setSearch] = useState('');
 
     const onSave = async (e) => {
         e.preventDefault();
         const res = await handleSave(formData);
-        if (res.success) setFormData({ name: '', desc: '' });
+        if (res.success) setFormData(initialFormData);
         else alert(res.message);
+    };
+
+    const onSearch = (e) => {
+        const value = e.target.value;
+        setSearch(value);
+        refresh(value);
     };
 
     const columns = [
@@ -25,17 +32,21 @@ export default function ManagePrimaryItem() {
         <MasterDataPage
             title="Primary Item Master"
             description="Maintain the top-level product groups used across item creation, cataloging, and reporting."
-            formTitle="Add Primary Group"
+            formTitle={formData.id ? 'Update Primary Group' : 'Add Primary Group'}
             formHint="Create a clear parent group before mapping sub groups and items."
             onSubmit={onSave}
-            primaryAction="Save Primary Group"
+            primaryAction={formData.id ? 'Update Primary Group' : 'Save Primary Group'}
+            secondaryAction={formData.id ? { label: 'Cancel Edit', onClick: () => setFormData(initialFormData) } : null}
             tableTitle="Existing Primary Groups"
             tableHint="Primary groups define the first level of the item hierarchy."
             columns={columns}
             data={items}
             loading={loading}
-            actions={['Delete']}
-            onAction={(action, row) => action === 'Delete' && handleDelete(row.id)}
+            actions={['Edit', 'Delete']}
+            onAction={(action, row) => {
+                if (action === 'Edit') setFormData({ id: row.id, name: row.name, desc: row.desc || '' });
+                if (action === 'Delete') handleDelete(row.id);
+            }}
             stats={[{ label: 'Required Fields', value: '1' }]}
         >
             <div className="form-group">
@@ -45,8 +56,18 @@ export default function ManagePrimaryItem() {
                     className="login-input"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Example: Bags"
+                    placeholder="Example: Piston Pins"
                     required
+                />
+            </div>
+            <div className="form-group">
+                <label>Search Groups</label>
+                <input
+                    type="search"
+                    className="login-input"
+                    value={search}
+                    onChange={onSearch}
+                    placeholder="Search primary groups"
                 />
             </div>
             <div className="form-group full-width">

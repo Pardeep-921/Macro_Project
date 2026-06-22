@@ -19,6 +19,9 @@ export const AuthModel = {
             return {
                 success: true,
                 role: data.role,
+                roleMaster: data.role_master,
+                username: data.username,
+                companyIdCode: data.company_id_code,
                 token: data.token
             };
         }

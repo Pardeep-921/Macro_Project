@@ -32,6 +32,30 @@ export const OrderModel = {
             return { success: false };
         }
     },
+    getDashboardStats: async () => {
+        try {
+            const response = await fetch(apiUrl('/api/dashboard/stats'), {
+                headers: { 'Authorization': getToken() }
+            });
+            if (!response.ok) return null;
+            const data = await response.json();
+            return data?.stats || null;
+        } catch (error) {
+            console.error('Failed to fetch dashboard stats:', error);
+            return null;
+        }
+    },
+    updateOrderStatus: async (orderNo, status) => {
+        const response = await fetch(apiUrl(`/api/orders/${orderNo}/status`), {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': getToken()
+            },
+            body: JSON.stringify({ status })
+        });
+        return await response.json();
+    },
     approveOrder: async (orderNo) => {
         const response = await fetch(apiUrl(`/api/orders/${orderNo}/approve`), { 
             method: 'POST',

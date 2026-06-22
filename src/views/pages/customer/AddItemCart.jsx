@@ -27,10 +27,13 @@ export default function AddItemCart() {
             destination: 'Direct Submission',
             requisition: 'PO-' + Date.now().toString().slice(-6),
             items: cart.map(item => ({
-                id: item.id,
+                item_id: item.item_id || item.id,
+                id: item.item_id || item.id,
                 name: item.name,
                 size: item.size,
+                size_id: item.size_id || item.item_size_id,
                 qty: item.qty,
+                quantity: item.qty,
                 price: item.price,
                 uom: item.uom
             }))

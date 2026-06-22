@@ -6,9 +6,9 @@ export const useCompanyController = () => {
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchCompanies = async (silent = false) => {
+    const fetchCompanies = async (silent = false, search = '') => {
         if (!silent) setLoading(true);
-        const data = await CompanyModel.getCompanies();
+        const data = await CompanyModel.getCompanies(search);
         setCompanies(data);
         setLoading(false);
     };
@@ -23,14 +23,29 @@ export const useCompanyController = () => {
             alert('Company saved successfully!');
             fetchCompanies(true);
         } else {
-            alert('Error saving company');
+            alert(response.message || 'Error saving company');
         }
         return response.success;
+    };
+
+    const handleDeleteCompany = async (id) => {
+        if (!id) return false;
+        if (!window.confirm('Are you sure you want to delete this company?')) return false;
+        const response = await CompanyModel.deleteCompany(id);
+        if (response.success) {
+            alert('Company deleted successfully!');
+            fetchCompanies(true);
+            return true;
+        }
+        alert(response.message || 'Error deleting company');
+        return false;
     };
 
     return {
         companies,
         loading,
-        handleSaveCompany
+        fetchCompanies,
+        handleSaveCompany,
+        handleDeleteCompany
     };
 };

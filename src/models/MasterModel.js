@@ -7,8 +7,9 @@ const getToken = () => {
 };
 
 const createMasterEndpoints = (entity) => ({
-    get: async () => {
-        const response = await fetch(apiUrl(`/api/${entity}`), {
+    get: async (search = '') => {
+        const query = search ? `?search=${encodeURIComponent(search)}` : '';
+        const response = await fetch(apiUrl(`/api/${entity}${query}`), {
             headers: { 'Authorization': getToken() }
         });
         return await response.json();
@@ -19,6 +20,17 @@ const createMasterEndpoints = (entity) => ({
             headers: { 
                 'Content-Type': 'application/json',
                 'Authorization': getToken() 
+            },
+            body: JSON.stringify(data)
+        });
+        return await response.json();
+    },
+    update: async (id, data) => {
+        const response = await fetch(apiUrl(`/api/${entity}/${id}`), {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': getToken()
             },
             body: JSON.stringify(data)
         });
@@ -38,10 +50,14 @@ export const MasterModel = {
     Units: createMasterEndpoints('units'),
     Sizes: createMasterEndpoints('sizes'),
     PrimaryItems: createMasterEndpoints('primary-items'),
+    PrimaryGroups: createMasterEndpoints('primary-groups'),
+    SubGroups: createMasterEndpoints('sub-groups'),
+    ShippingCarriers: createMasterEndpoints('shipping-carriers'),
     Products: {
         ...createMasterEndpoints('products'),
-        get: async () => {
-            const response = await fetch(apiUrl('/api/products'), {
+        get: async (search = '') => {
+            const query = search ? `?search=${encodeURIComponent(search)}` : '';
+            const response = await fetch(apiUrl(`/api/products${query}`), {
                 headers: { 'Authorization': getToken() }
             });
             return await response.json();

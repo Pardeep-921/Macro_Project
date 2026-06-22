@@ -124,6 +124,20 @@ describe('Express API (MySQL)', () => {
 
     assert.strictEqual(dup.body.success, false);
 
+    await request(app)
+      .post('/api/auth/login')
+      .send({ username: email, password: 'secret123' })
+      .expect(403);
+
+    const adminLogin = await request(app)
+      .post('/api/auth/login')
+      .send({ username: 'admin', password: 'admin' });
+
+    await request(app)
+      .patch(`/api/admin/approve-user/${reg.body.user.id}`)
+      .set('Authorization', `Bearer ${adminLogin.body.token}`)
+      .expect(200);
+
     const login = await request(app)
       .post('/api/auth/login')
       .send({ username: email, password: 'secret123' })

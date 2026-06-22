@@ -7,12 +7,12 @@ export const useMasterDataController = (entityKey) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
-    const fetchData = async () => {
+    const fetchData = async (search = '') => {
         setLoading(true);
         try {
-            const result = await MasterModel[entityKey].get();
+            const result = await MasterModel[entityKey].get(search);
             setData(Array.isArray(result) ? result : []);
-        } catch (err) {
+        } catch {
             setError(`Failed to fetch ${entityKey}`);
         } finally {
             setLoading(false);
@@ -25,7 +25,9 @@ export const useMasterDataController = (entityKey) => {
 
     const handleSave = async (payload) => {
         try {
-            const res = await MasterModel[entityKey].create(payload);
+            const res = payload.id && MasterModel[entityKey].update
+                ? await MasterModel[entityKey].update(payload.id, payload)
+                : await MasterModel[entityKey].create(payload);
             if (res.success) {
                 fetchData();
                 return { success: true };
