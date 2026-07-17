@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AuthContext } from './AuthContext';
 
 export const AuthProvider = ({ children }) => {
@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('maco_user', JSON.stringify(parsed));
       }
       return parsed;
-    } catch (e) {
+    } catch {
       return null;
     }
   });

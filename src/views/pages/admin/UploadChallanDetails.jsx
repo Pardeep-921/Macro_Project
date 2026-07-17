@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import PageHeader from '../../components/PageHeader';
 import { useSupplyController } from '../../../controllers/SupplyController';
-import { apiUrl } from '../../../config/api';
+import { MasterModel } from '../../../models/MasterModel';
+import { OrderModel } from '../../../models/OrderModel';
 
 export default function UploadChallanDetails() {
     const { handleUploadChallan } = useSupplyController();
@@ -17,14 +18,10 @@ export default function UploadChallanDetails() {
 
     useEffect(() => {
         const loadDispatchMasters = async () => {
-            const token = JSON.parse(localStorage.getItem('maco_user'))?.token;
-            const headers = { Authorization: `Bearer ${token}` };
-            const [orderRes, carrierRes] = await Promise.all([
-                fetch(apiUrl('/api/orders'), { headers }),
-                fetch(apiUrl('/api/shipping-carriers'), { headers })
+            const [orderData, carrierData] = await Promise.all([
+                OrderModel.getDraftOrders(),
+                MasterModel.ShippingCarriers.get()
             ]);
-            const orderData = orderRes.ok ? await orderRes.json() : [];
-            const carrierData = carrierRes.ok ? await carrierRes.json() : [];
             setOrders(orderData.filter(order => order.order_status === 'ACCEPTED' || order.status === 'Accepted'));
             setCarriers(carrierData);
         };

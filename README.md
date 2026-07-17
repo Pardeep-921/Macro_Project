@@ -1,63 +1,48 @@
-# Macro_Project
-This is the project for enterprise.
+# MACO ERP Demo
 
-## Local Launch Checklist
+This is a self-contained React/Vite demo build for client presentation. The frontend uses seeded mock data in browser `localStorage`, so it can be deployed directly on Vercel without an API server or database.
 
-1. Create `backend/.env` with `JWT_SECRET`, `MYSQL_HOST`, `MYSQL_USER`, `MYSQL_PASSWORD`, and `MYSQL_DATABASE`.
-2. Optional backend settings: `MYSQL_PORT=3306`, `MYSQL_POOL_SIZE=10`, `CORS_ORIGIN=http://localhost:5173`, and SMTP settings for live emails.
-3. Create frontend `.env` in this folder with `VITE_API_URL=http://localhost:3000`.
-4. Install dependencies in both folders:
+## Demo Login
+
+Use either account:
+
+```text
+Admin: admin / admin
+Customer: customer / customer
+
+Also supported:
+Admin: admin@maco.demo / demo123
+Customer: customer@maco.demo / demo123
+```
+
+Demo data includes companies, products, orders, supplies, CRM leads/deals/tasks, master data, reporting charts, CSV exports, and PDF generation flows.
+
+## Local Launch
 
 ```powershell
 npm install
-cd backend
-npm install
-```
-
-5. From `backend`, run the final QA checks:
-
-```powershell
-npm test
-npm run audit:phase6
-```
-
-6. Start local services in two terminals:
-
-```powershell
-cd backend
 npm run dev
 ```
 
-```powershell
-npm run dev
+To reset the demo data, clear the browser's local storage for the site or run this in the browser console:
+
+```js
+localStorage.removeItem('maco_demo_db_v1');
+localStorage.removeItem('maco_user');
+localStorage.removeItem('maco_po_cart');
+location.reload();
 ```
 
-Manual smoke path: log in as `admin/admin` and `customer/customer`, browse catalog, submit a customer order, approve it as admin, upload challan details, verify customer supply tracking, generate PDF, and export catalog/orders/supplies.
+## Deploy on Vercel
 
-## Configure API URL
+Use these Vercel project settings:
 
-The frontend reads the backend URL from `VITE_API_URL`.
+- Framework Preset: `Vite`
+- Root Directory: project root
+- Install Command: `npm install`
+- Build Command: `npm run build`
+- Output Directory: `dist`
 
-- Create a file named `.env` in the project root (same folder as `package.json`)
-- Add:
+No Vercel environment variables are required for the demo version.
 
-`VITE_API_URL=http://localhost:3000`
-
-If you don't create `.env`, it defaults to `http://localhost:3000`.
-
-## React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The included `vercel.json` keeps React Router pages working on refresh by routing all app paths back to `index.html`.

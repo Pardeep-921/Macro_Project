@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PageHeader from '../../components/PageHeader';
-import { apiUrl } from '../../../config/api';
+import { MockDb } from '../../../data/mockDb';
 
 export default function Reporting() {
     const [salesData, setSalesData] = useState([]);
@@ -10,18 +10,9 @@ export default function Reporting() {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const token = JSON.parse(localStorage.getItem('maco_user'))?.token;
-                const headers = { 'Authorization': `Bearer ${token}` };
-
-                const [sRes, supRes] = await Promise.all([
-                    fetch(apiUrl('/api/reports/sales'), { headers }),
-                    fetch(apiUrl('/api/reports/supplies'), { headers })
-                ]);
-
-                if (sRes.ok && supRes.ok) {
-                    setSalesData(await sRes.json());
-                    setSupplyData(await supRes.json());
-                }
+                const reports = MockDb.getReports();
+                setSalesData(reports.salesData);
+                setSupplyData(reports.supplyData);
             } catch (err) {
                 console.error('Report Error:', err);
             } finally {
@@ -36,18 +27,7 @@ export default function Reporting() {
     const totalChallans = supplyData.reduce((sum, item) => sum + Number(item.challanCount || 0), 0);
 
     const downloadExport = async (type) => {
-        const token = JSON.parse(localStorage.getItem('maco_user'))?.token;
-        const response = await fetch(apiUrl(`/api/exports/${type}`), {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!response.ok) return alert('Export failed');
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `maco_${type}_${new Date().toISOString().split('T')[0]}.xlsx`;
-        link.click();
-        window.URL.revokeObjectURL(url);
+        MockDb.downloadExport(type);
     };
 
     if (loading) {

@@ -18,7 +18,7 @@ export const useSupplyController = () => {
             ]);
             setSupplies(supplyData);
             setCompanies(companyData);
-        } catch (err) {
+        } catch {
             setError('Failed to fetch supply data');
         } finally {
             setLoading(false);
@@ -34,7 +34,7 @@ export const useSupplyController = () => {
         try {
             const data = await SupplyModel.getSupplies(filters);
             setSupplies(data);
-        } catch (err) {
+        } catch {
             setError('Search failed');
         } finally {
             setLoading(false);

@@ -176,8 +176,32 @@
   align-items: center;
 }
 
-.login-input,
-.login-select {
+.password-field-wrapper .input-wrapper {
+  width: 100%;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  line-height: 0;
+}
+
+.password-toggle:hover {
+  color: var(--primary-orange);
+}
+
+.login-page .login-input,
+.login-page .login-select {
   width: 100%;
   padding: 0.8rem 1rem;
   background: var(--input-bg) !important;
@@ -191,6 +215,17 @@
   appearance: none;
 }
 
+.login-page input,
+.login-page select,
+.login-page textarea {
+  color: #ffffff !important;
+}
+
+.login-page select option {
+  color: #ffffff !important;
+  background: #2a2a2a !important;
+}
+
 /* Stabilize select background after selection */
 .login-select {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -201,25 +236,25 @@
 }
 
 /* Prevent browser autofill from turning fields white */
-.login-input:-webkit-autofill,
-.login-input:-webkit-autofill:hover,
-.login-input:-webkit-autofill:focus,
-.login-select:-webkit-autofill,
-.login-select:-webkit-autofill:hover,
-.login-select:-webkit-autofill:focus {
+.login-page .login-input:-webkit-autofill,
+.login-page .login-input:-webkit-autofill:hover,
+.login-page .login-input:-webkit-autofill:focus,
+.login-page .login-select:-webkit-autofill,
+.login-page .login-select:-webkit-autofill:hover,
+.login-page .login-select:-webkit-autofill:focus {
   -webkit-text-fill-color: #ffffff !important;
   -webkit-box-shadow: 0 0 0px 1000px #2a2a2a inset !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Fix for Select dropdown background in some browsers */
-.login-select option {
+.login-page .login-select option {
   background: #2a2a2a;
   color: #ffffff;
 }
 
-.login-input:focus,
-.login-select:focus {
+.login-page .login-input:focus,
+.login-page .login-select:focus {
   border-color: var(--input-focus);
   background: rgba(255, 255, 255, 0.15) !important;
   box-shadow: 0 0 0 4px rgba(227, 122, 34, 0.15);

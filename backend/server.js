@@ -51,12 +51,15 @@ const authLimiter = rateLimit({
 
 // --- MIDDLEWARE ---
 const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1]; // expects "Bearer <token>"
+  const authHeader = req.headers['authorization'] || req.headers['Authorization'];
+  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
   if (!token) return res.status(401).json({ success: false, message: 'Access denied. No token provided.' });
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ success: false, message: 'Invalid or expired token.' });
+    if (err) {
+      console.error('JWT verification failed:', err.message);
+      return res.status(403).json({ success: false, message: 'Invalid or expired token.' });
+    }
     req.user = user;
     next();
   });

@@ -3,7 +3,7 @@ import PageHeader from '../../components/PageHeader';
 import SearchForm from '../../components/SearchForm';
 import DataTable from '../../components/DataTable';
 import { useSupplyController } from '../../../controllers/SupplyController';
-import { apiUrl } from '../../../config/api';
+import { MockDb } from '../../../data/mockDb';
 import { PDFService } from '../../../services/PDFService';
 
 export default function TrackSupplyDetails() {
@@ -27,18 +27,7 @@ export default function TrackSupplyDetails() {
     ];
 
     const downloadExport = async () => {
-        const token = JSON.parse(localStorage.getItem('maco_user'))?.token;
-        const response = await fetch(apiUrl('/api/exports/supplies'), {
-            headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!response.ok) return alert('Export failed');
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `maco_supplies_${new Date().toISOString().split('T')[0]}.xlsx`;
-        link.click();
-        window.URL.revokeObjectURL(url);
+        MockDb.downloadExport('supplies');
     };
 
     return (

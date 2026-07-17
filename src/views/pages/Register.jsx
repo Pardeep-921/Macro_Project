@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import macoLogo from '../../assets/maco logo white.png';
 import './Login.css';
 import { AuthModel } from '../../models/AuthModel';
@@ -8,11 +8,9 @@ export default function Register() {
     const [fullname, setFullname] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [role, setRole] = useState('customer');
+    const [role] = useState('customer');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const navigate = useNavigate();
-
     React.useEffect(() => {
         // Hide scrollbar (slider) on the right side
         document.body.style.overflow = 'hidden';

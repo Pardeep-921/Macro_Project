@@ -362,12 +362,25 @@ a:hover {
   outline: none;
   transition: border-color 0.2s;
   width: 100%;
+  color: #121212 !important;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
   border-color: var(--orange-primary);
+}
+
+/* Fix browser autofill for regular form groups */
+.form-group input:-webkit-autofill,
+.form-group input:-webkit-autofill:hover,
+.form-group input:-webkit-autofill:focus,
+.form-group select:-webkit-autofill,
+.form-group select:-webkit-autofill:hover,
+.form-group select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-dark) !important;
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .form-group textarea {
@@ -378,6 +391,27 @@ a:hover {
 .form-group select {
   background-color: #fff;
   cursor: pointer;
+  color: #121212;
+}
+
+.form-group select option {
+  color: #121212;
+  background-color: #ffffff;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  color: #121212 !important;
+}
+
+select option {
+  color: #121212 !important;
+  background: #ffffff !important;
 }
 
 .form-group.full-width {
@@ -728,6 +762,15 @@ fieldset legend {
   box-shadow: 0 0 0 3px rgba(227, 122, 34, 0.14);
 }
 
+/* Fix browser autofill for dashboard select */
+.dashboard-select:-webkit-autofill,
+.dashboard-select:-webkit-autofill:hover,
+.dashboard-select:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-dark) !important;
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 .dashboard-note {
   margin-top: 24px;
   color: var(--text-medium);
@@ -884,6 +927,7 @@ fieldset legend {
   border-color: #d8cbc0;
   border-radius: 6px;
   background: #fffdfb;
+  color: var(--text-dark);
 }
 
 .master-form .form-group textarea {
@@ -895,6 +939,21 @@ fieldset legend {
 .master-form .form-group textarea:focus {
   border-color: var(--orange-primary);
   box-shadow: 0 0 0 3px rgba(227, 122, 34, 0.14);
+}
+
+/* Fix browser autofill for master forms */
+.master-form .form-group input:-webkit-autofill,
+.master-form .form-group input:-webkit-autofill:hover,
+.master-form .form-group input:-webkit-autofill:focus,
+.master-form .form-group select:-webkit-autofill,
+.master-form .form-group select:-webkit-autofill:hover,
+.master-form .form-group select:-webkit-autofill:focus,
+.master-form .form-group textarea:-webkit-autofill,
+.master-form .form-group textarea:-webkit-autofill:hover,
+.master-form .form-group textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-dark) !important;
+  -webkit-box-shadow: 0 0 0px 1000px #fffdfb inset !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .master-actions {
@@ -1210,6 +1269,20 @@ fieldset legend {
 
 .company-field select {
   appearance: none;
+  color: var(--text-dark);
+}
+
+.company-field select option {
+  color: var(--text-dark);
+  background: #ffffff;
+}
+
+.master-form .form-group select option,
+.order-supply-form .form-group select option,
+.crm-form .form-group select option,
+.form-group select option {
+  color: #121212 !important;
+  background: #ffffff !important;
 }
 
 .company-field input:focus,
@@ -1222,6 +1295,21 @@ fieldset legend {
 .company-field input::placeholder,
 .company-search-row input::placeholder {
   color: #9a9a9a;
+}
+
+/* Fix browser autofill turning text invisible */
+.company-field input:-webkit-autofill,
+.company-field input:-webkit-autofill:hover,
+.company-field input:-webkit-autofill:focus,
+.company-field select:-webkit-autofill,
+.company-field select:-webkit-autofill:hover,
+.company-field select:-webkit-autofill:focus,
+.company-search-row input:-webkit-autofill,
+.company-search-row input:-webkit-autofill:hover,
+.company-search-row input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-dark) !important;
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .company-form-actions {
@@ -1512,6 +1600,7 @@ fieldset legend {
   border-color: #d8cbc0;
   border-radius: 6px;
   background: #fffdfb;
+  color: var(--text-dark);
 }
 
 .order-supply-form .form-group input:focus,
@@ -1519,6 +1608,21 @@ fieldset legend {
 .order-supply-form .form-group textarea:focus {
   border-color: var(--orange-primary);
   box-shadow: 0 0 0 3px rgba(227, 122, 34, 0.14);
+}
+
+/* Fix browser autofill for order/supply forms */
+.order-supply-form .form-group input:-webkit-autofill,
+.order-supply-form .form-group input:-webkit-autofill:hover,
+.order-supply-form .form-group input:-webkit-autofill:focus,
+.order-supply-form .form-group select:-webkit-autofill,
+.order-supply-form .form-group select:-webkit-autofill:hover,
+.order-supply-form .form-group select:-webkit-autofill:focus,
+.order-supply-form .form-group textarea:-webkit-autofill,
+.order-supply-form .form-group textarea:-webkit-autofill:hover,
+.order-supply-form .form-group textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-dark) !important;
+  -webkit-box-shadow: 0 0 0px 1000px #fffdfb inset !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .order-supply-form .btn-group {

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import PageHeader from '../../components/PageHeader';
 import SearchForm from '../../components/SearchForm';
 import DataTable from '../../components/DataTable';
-import { apiUrl } from '../../../config/api';
+import { MockDb } from '../../../data/mockDb';
+import { SupplyModel } from '../../../models/SupplyModel';
 import { PDFService } from '../../../services/PDFService';
 
 export default function CustomerTrackSupply() {
@@ -10,16 +11,9 @@ export default function CustomerTrackSupply() {
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({ fromDate: '', toDate: '' });
 
-    const authHeaders = () => {
-        const token = JSON.parse(localStorage.getItem('maco_user'))?.token;
-        return { Authorization: `Bearer ${token}` };
-    };
-
     const fetchSupplies = async (nextFilters = filters) => {
         setLoading(true);
-        const params = new URLSearchParams(nextFilters).toString();
-        const response = await fetch(apiUrl(`/api/supplies?${params}`), { headers: authHeaders() });
-        setSupplies(response.ok ? await response.json() : []);
+        setSupplies(await SupplyModel.getSupplies(nextFilters));
         setLoading(false);
     };
 
@@ -33,15 +27,7 @@ export default function CustomerTrackSupply() {
     };
 
     const downloadExport = async () => {
-        const response = await fetch(apiUrl('/api/exports/supplies'), { headers: authHeaders() });
-        if (!response.ok) return alert('Export failed');
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `maco_my_supplies_${new Date().toISOString().split('T')[0]}.xlsx`;
-        link.click();
-        window.URL.revokeObjectURL(url);
+        MockDb.downloadExport('supplies');
     };
 
     const columns = [
