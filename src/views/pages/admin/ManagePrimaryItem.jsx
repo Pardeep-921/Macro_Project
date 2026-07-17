@@ -23,14 +23,14 @@ export default function ManagePrimaryItem() {
     };
 
     const columns = [
-        { key: 'id', header: 'ID' },
-        { key: 'name', header: 'Group Name' },
+        { key: 'id', header: 'Primary Group ID' },
+        { key: 'name', header: 'Primary Group Name' },
         { key: 'desc', header: 'Description' }
     ];
 
     return (
         <MasterDataPage
-            title="Primary Item Master"
+            title="Manage Primary Group Master"
             description="Maintain the top-level product groups used across item creation, cataloging, and reporting."
             formTitle={formData.id ? 'Update Primary Group' : 'Add Primary Group'}
             formHint="Create a clear parent group before mapping sub groups and items."
@@ -69,6 +69,7 @@ export default function ManagePrimaryItem() {
                     onChange={onSearch}
                     placeholder="Search primary groups"
                 />
+                <p className="field-note">Use this field to search or filter existing primary groups before adding a new one.</p>
             </div>
             <div className="form-group full-width">
                 <label>Description</label>

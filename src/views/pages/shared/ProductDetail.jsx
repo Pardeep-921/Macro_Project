@@ -78,7 +78,7 @@ export default function ProductDetail() {
                         <h4>Supplier Information</h4>
                         <div className="supplier-grid">
                             <div className="sup-item">
-                                <span className="label">Company:</span>
+                                <span className="label">Customer:</span>
                                 <span className="val">{product.supplierName || 'Maco Automotive'}</span>
                             </div>
                             <div className="sup-item">

@@ -1,26 +1,35 @@
 import React, { useState } from 'react';
 import PageHeader from '../../components/PageHeader';
-import SearchForm from '../../components/SearchForm';
 import DataTable from '../../components/DataTable';
 import { useSupplyController } from '../../../controllers/SupplyController';
 import { MockDb } from '../../../data/mockDb';
 import { PDFService } from '../../../services/PDFService';
 
 export default function TrackSupplyDetails() {
-    const { supplies, companies, loading, searchSupplies } = useSupplyController();
-    const [filters, setFilters] = useState({ companyId: '', fromDate: '', toDate: '' });
+    const { supplies, customers, loading, searchSupplies } = useSupplyController();
+    const [filters, setFilters] = useState({ companyId: '', companyName: '', fromDate: '', toDate: '' });
     const totalQuantity = supplies.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
     const challanCount = new Set(supplies.map(item => item.challanNo).filter(Boolean)).size;
 
     const handleSearch = (e) => {
         e.preventDefault();
-        searchSupplies(filters);
+        searchSupplies({
+            companyId: filters.companyId || filters.companyName,
+            fromDate: filters.fromDate,
+            toDate: filters.toDate
+        });
+    };
+
+    const handleReset = () => {
+        const emptyFilters = { companyId: '', companyName: '', fromDate: '', toDate: '' };
+        setFilters(emptyFilters);
+        searchSupplies({ companyId: '', fromDate: '', toDate: '' });
     };
 
     const columns = [
         { key: 'challanNo', header: 'Challan No' },
         { key: 'orderNo', header: 'Order No' },
-        { key: 'companyName', header: 'Company' },
+        { key: 'companyName', header: 'Customer' },
         { key: 'carrierName', header: 'Carrier' },
         { key: 'challanDate', header: 'Challan Date' },
         { key: 'supplyDetails', header: 'Supply Details' }
@@ -55,8 +64,8 @@ export default function TrackSupplyDetails() {
                         <strong>{loading ? '...' : totalQuantity.toLocaleString('en-IN')}</strong>
                     </div>
                     <div className="order-supply-stat tone-warning">
-                        <span>Companies</span>
-                        <strong>{companies.length}</strong>
+                        <span>Customers</span>
+                        <strong>{customers.length}</strong>
                     </div>
                 </div>
 
@@ -68,41 +77,54 @@ export default function TrackSupplyDetails() {
                         </div>
                     </div>
                     <form onSubmit={handleSearch} className="order-supply-form">
-                        <SearchForm title="Search Supply Criteria">
-                            <div className="form-group">
-                                <label>Company</label>
-                                <select
-                                    className="login-input"
-                                    value={filters.companyId}
-                                    onChange={e => setFilters({...filters, companyId: e.target.value})}
-                                >
-                                    <option value="">--All Companies--</option>
-                                    {companies.map(c => <option key={c.companyId} value={c.companyId}>{c.name}</option>)}
-                                </select>
+                        <fieldset>
+                            <legend>Search Supply Criteria</legend>
+                            <div className="form-grid">
+                                <div className="form-group">
+                                    <label>Customer Id</label>
+                                    <input
+                                        type="text"
+                                        className="login-input"
+                                        value={filters.companyId}
+                                        onChange={e => setFilters({ ...filters, companyId: e.target.value })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>Customer Name</label>
+                                    <select
+                                        className="login-input"
+                                        value={filters.companyName}
+                                        onChange={e => setFilters({ ...filters, companyName: e.target.value })}
+                                    >
+                                        <option value="">--Select--</option>
+                                        {customers.map(customer => <option key={customer.companyId} value={customer.companyId}>{customer.name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label>From Date</label>
+                                    <input
+                                        type="date"
+                                        className="login-input"
+                                        value={filters.fromDate}
+                                        onChange={e => setFilters({ ...filters, fromDate: e.target.value })}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label>To Date</label>
+                                    <input
+                                        type="date"
+                                        className="login-input"
+                                        value={filters.toDate}
+                                        onChange={e => setFilters({ ...filters, toDate: e.target.value })}
+                                    />
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label>From Date</label>
-                                <input
-                                    type="date"
-                                    className="login-input"
-                                    value={filters.fromDate}
-                                    onChange={e => setFilters({...filters, fromDate: e.target.value})}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>To Date</label>
-                                <input
-                                    type="date"
-                                    className="login-input"
-                                    value={filters.toDate}
-                                    onChange={e => setFilters({...filters, toDate: e.target.value})}
-                                />
-                            </div>
-                            <div className="order-supply-search-actions">
+                            <div className="btn-group">
                                 <button type="submit" className="btn btn-primary">Search Supplies</button>
+                                <button type="button" className="btn btn-secondary" onClick={handleReset}>Reset</button>
                                 <button type="button" className="btn btn-secondary" onClick={downloadExport}>Export List</button>
                             </div>
-                        </SearchForm>
+                        </fieldset>
                     </form>
                 </div>
 

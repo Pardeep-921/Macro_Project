@@ -327,6 +327,20 @@ export const MockDb = {
         return { success: true, user, message: 'Demo registration submitted for admin approval.' };
     },
 
+    changePassword(username, currentPassword, newPassword) {
+        const db = loadDb();
+        const user = db.users.find(item => item.username === username);
+        if (!user || user.role !== 'admin') {
+            throw new Error('Only an administrator can change the admin password.');
+        }
+        if (user.password !== currentPassword && user.username !== currentPassword) {
+            throw new Error('Current password is incorrect.');
+        }
+        user.password = newPassword;
+        saveDb(db);
+        return { success: true, message: 'Admin password updated successfully.' };
+    },
+
     getPendingUsers() {
         return loadDb().pendingUsers.filter(user => user.status === 'pending');
     },
@@ -347,37 +361,49 @@ export const MockDb = {
         return { success: true };
     },
 
-    getCompanies(search = '') {
+    getCustomers(search = '') {
         return filterByText(loadDb().companies, search, ['companyId', 'name', 'username', 'email', 'city', 'pan_no', 'tin_no']);
     },
 
-    saveCompany(companyData) {
+    saveCustomer(customerData) {
         const db = loadDb();
-        const id = companyData.id || nextId(db.companies);
-        const company = {
-            ...companyData,
+        const id = customerData.id || nextId(db.companies);
+        const customer = {
+            ...customerData,
             id,
-            companyId: companyData.companyId || companyData.company_id_code,
-            company_id_code: companyData.companyId || companyData.company_id_code,
-            name: companyData.name || companyData.company_name,
-            company_name: companyData.name || companyData.company_name,
-            contact: companyData.contact || companyData.contact_no,
-            contact_no: companyData.contact || companyData.contact_no,
-            isActive: Boolean(companyData.isActive ?? companyData.is_active ?? true),
-            is_active: Boolean(companyData.isActive ?? companyData.is_active ?? true)
+            companyId: customerData.companyId || customerData.company_id_code,
+            company_id_code: customerData.companyId || customerData.company_id_code,
+            name: customerData.name || customerData.company_name,
+            company_name: customerData.name || customerData.company_name,
+            contact: customerData.contact || customerData.contact_no,
+            contact_no: customerData.contact || customerData.contact_no,
+            isActive: Boolean(customerData.isActive ?? customerData.is_active ?? true),
+            is_active: Boolean(customerData.isActive ?? customerData.is_active ?? true)
         };
         const index = db.companies.findIndex(item => String(item.id) === String(id));
-        if (index >= 0) db.companies[index] = company;
-        else db.companies.push(company);
+        if (index >= 0) db.companies[index] = customer;
+        else db.companies.push(customer);
         saveDb(db);
-        return { success: true, company };
+        return { success: true, customer };
+    },
+
+    deleteCustomer(id) {
+        const db = loadDb();
+        db.companies = db.companies.filter(customer => String(customer.id) !== String(id));
+        saveDb(db);
+        return { success: true };
+    },
+
+    getCompanies(search = '') {
+        return this.getCustomers(search);
+    },
+
+    saveCompany(companyData) {
+        return this.saveCustomer(companyData);
     },
 
     deleteCompany(id) {
-        const db = loadDb();
-        db.companies = db.companies.filter(company => String(company.id) !== String(id));
-        saveDb(db);
-        return { success: true };
+        return this.deleteCustomer(id);
     },
 
     getOrders() {

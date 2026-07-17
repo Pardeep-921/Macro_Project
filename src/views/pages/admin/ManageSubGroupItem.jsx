@@ -29,23 +29,23 @@ export default function ManageSubGroupItem() {
     };
 
     const columns = [
-        { key: 'id', header: 'ID' },
-        { key: 'name', header: 'Sub Group Name' },
-        { key: 'primaryGroupName', header: 'Primary Group' },
-        { key: 'chapter_heading_no', header: 'Chapter Heading No' }
+        { key: 'id', header: 'Item Group ID' },
+        { key: 'name', header: 'Item Group Name' },
+        { key: 'primaryGroupName', header: 'Primary Group Name' },
+        { key: 'chapter_heading_no', header: 'ItemChapter' }
     ];
 
     return (
         <MasterDataPage
-            title="Sub Item Master"
+            title="Sub Group Item Master"
             description="Organize secondary product groups under primary groups with chapter heading references."
             formTitle={formData.id ? 'Update Sub Group' : 'Add Sub Group'}
-            formHint="Select the parent primary group before saving the sub group."
+            formHint="Enter the item sub group details, then use search only when you need to filter existing records below."
             onSubmit={onSave}
             primaryAction={formData.id ? 'Update Sub Group' : 'Save Sub Group'}
             secondaryAction={formData.id ? { label: 'Cancel Edit', onClick: () => setFormData(initialFormData) } : null}
             tableTitle="Existing Sub Groups"
-            tableHint="Sub groups are available while creating item master records."
+            tableHint="Use the search field above to quickly find saved sub groups by name, under group, or chapter/heading no."
             columns={columns}
             data={subGroups}
             loading={loading || primaryLoading}
@@ -64,49 +64,52 @@ export default function ManageSubGroupItem() {
             stats={[{ label: 'Primary Groups', value: primaryGroups.length }]}
         >
             <div className="form-group">
-                <label className="required-label">Primary Group <span className="required">*</span></label>
+                <label className="required-label">Item Sub Group <span className="required">*</span></label>
+                <input
+                    type="text"
+                    className="login-input"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Enter item sub group"
+                    required
+                />
+            </div>
+            <div className="form-group">
+                <label className="required-label">Under Primary Group <span className="required">*</span></label>
                 <select
                     className="login-input"
                     value={formData.primary_group_id}
                     onChange={e => setFormData({ ...formData, primary_group_id: e.target.value })}
                     required
                 >
-                    <option value="">Select primary group</option>
+                    <option value="">--Select--</option>
                     {primaryGroups.map(group => (
                         <option key={group.id} value={group.id}>{group.name}</option>
                     ))}
                 </select>
             </div>
             <div className="form-group">
-                <label className="required-label">Sub Group Name <span className="required">*</span></label>
-                <input
-                    type="text"
-                    className="login-input"
-                    value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Example: Lorries & Trucks"
-                    required
-                />
-            </div>
-            <div className="form-group">
-                <label>Chapter Heading No</label>
+                <label>Chapter/Heading No</label>
                 <input
                     type="text"
                     className="login-input"
                     value={formData.chapter_heading_no}
                     onChange={e => setFormData({ ...formData, chapter_heading_no: e.target.value })}
-                    placeholder="Example: HS-8708"
+                    placeholder="Enter chapter/heading no"
                 />
             </div>
             <div className="form-group">
-                <label>Search Sub Groups</label>
+                <label>Search Existing Sub Groups</label>
                 <input
                     type="search"
                     className="login-input"
                     value={search}
                     onChange={onSearch}
-                    placeholder="Search name, parent group, chapter"
+                    placeholder="Search item sub group, under group, chapter/heading no"
                 />
+                <p className="field-note">
+                    Note: This field is only for finding saved records in the Existing Sub Groups list. It is not saved with the sub group form.
+                </p>
             </div>
         </MasterDataPage>
     );

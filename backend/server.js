@@ -76,12 +76,12 @@ const validateRegistration = (req, res, next) => {
   next();
 };
 
-const validateCompany = (req, res, next) => {
+const validateCustomer = (req, res, next) => {
   const companyId = req.body?.companyId || req.body?.company_id_code;
   const name = req.body?.name || req.body?.company_name;
   const { email } = req.body || {};
   if (!companyId || !name || !email) {
-    return res.status(400).json({ success: false, message: 'Company ID, company name, and email are required.' });
+    return res.status(400).json({ success: false, message: 'Customer ID, customer name, and email are required.' });
   }
   next();
 };
@@ -241,7 +241,7 @@ const dbReady = initDb()
   });
 
 async function getUserByEmailOrUsername(identifier) {
-  const [companyRows] = await pool.execute(
+  const [customerRows] = await pool.execute(
     `SELECT
        id,
        username,
@@ -258,7 +258,7 @@ async function getUserByEmailOrUsername(identifier) {
     [identifier, identifier, identifier]
   );
 
-  if (companyRows[0]) return companyRows[0];
+  if (customerRows[0]) return customerRows[0];
 
   const [rows] = await pool.execute(
     `SELECT
@@ -280,7 +280,7 @@ async function getUserByEmailOrUsername(identifier) {
 }
 
 async function getUserByUsername(username) {
-  const [companyRows] = await pool.execute(
+  const [customerRows] = await pool.execute(
     `SELECT
        id,
        username,
@@ -297,7 +297,7 @@ async function getUserByUsername(username) {
     [username]
   );
 
-  if (companyRows[0]) return companyRows[0];
+  if (customerRows[0]) return customerRows[0];
 
   const [rows] = await pool.execute(
     `SELECT
@@ -346,7 +346,7 @@ function mapOrderRow(r) {
   };
 }
 
-function mapCompanyRow(r) {
+function mapCustomerRow(r) {
   return {
     id: r.id,
     companyId: r.company_id_code || r.companyId,
@@ -545,7 +545,7 @@ async function getItemMasterRows(search = '', activeOnly = false) {
   return rows;
 }
 
-async function getCompanyForRequest(user, connection = pool) {
+async function getCustomerForRequest(user, connection = pool) {
   if (user?.source === 'companies') {
     const [rows] = await connection.execute(
       'SELECT id, company_id_code, company_name, username, email FROM companies WHERE id = ? AND is_active = 1 LIMIT 1',
@@ -594,7 +594,7 @@ async function getOrderByNo(orderNo, connection = pool) {
 
 async function assertCustomerCanAccessOrder(req, order) {
   if (isAdminUser(req.user)) return true;
-  const company = await getCompanyForRequest(req.user);
+  const company = await getCustomerForRequest(req.user);
   return Boolean(company && Number(order.company_id) === Number(company.id));
 }
 
@@ -663,6 +663,47 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
 });
 
 // REGISTER — CHANGED: customers register as 'pending'; admins register as 'approved'
+app.patch('/api/auth/change-password', authenticateToken, async (req, res) => {
+  try {
+    if (!isAdminUser(req.user)) {
+      return res.status(403).json({ success: false, message: 'Admin only access.' });
+    }
+
+    const { currentPassword, newPassword } = req.body || {};
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Current password and new password are required.' });
+    }
+
+    if (String(newPassword).length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters.' });
+    }
+
+    const source = req.user.source === 'companies' ? 'companies' : 'users';
+    const [rows] = await pool.execute(
+      `SELECT id, password_hash AS passwordHash FROM ${source} WHERE id = ? LIMIT 1`,
+      [req.user.id]
+    );
+    const account = rows[0];
+
+    if (!account) {
+      return res.status(404).json({ success: false, message: 'Account not found.' });
+    }
+
+    const isMatch = await bcrypt.compare(String(currentPassword), account.passwordHash);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Current password is incorrect.' });
+    }
+
+    const passwordHash = await bcrypt.hash(String(newPassword), 10);
+    await pool.execute(`UPDATE ${source} SET password_hash = ? WHERE id = ?`, [passwordHash, req.user.id]);
+
+    return res.json({ success: true, message: 'Admin password updated successfully.' });
+  } catch (err) {
+    console.error('Change password error:', err);
+    return res.status(500).json({ success: false, message: 'Unable to update password.' });
+  }
+});
+
 app.post('/api/auth/register', authLimiter, validateRegistration, async (req, res) => {
   try {
     const { fullname, email, password, role, adminCredential } = req.body;
@@ -783,10 +824,10 @@ app.post('/api/orders', authenticateToken, validateOrder, async (req, res) => {
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    const company = await getCompanyForRequest(req.user, connection);
+    const company = await getCustomerForRequest(req.user, connection);
     if (!company) {
       await connection.rollback();
-      return res.status(403).json({ success: false, message: 'No active company profile is linked to this login.' });
+      return res.status(403).json({ success: false, message: 'No active customer profile is linked to this login.' });
     }
 
     const normalizedLines = [];
@@ -911,7 +952,7 @@ app.get('/api/orders', authenticateToken, async (req, res) => {
     const params = [];
     let where = '';
     if (!isAdminUser(req.user)) {
-      const company = await getCompanyForRequest(req.user);
+      const company = await getCustomerForRequest(req.user);
       if (!company) return res.json([]);
       where = 'WHERE o.company_id = ?';
       params.push(company.id);
@@ -1145,14 +1186,14 @@ app.get('/api/companies', authenticateToken, async (req, res) => {
       `SELECT * FROM companies ${where} ORDER BY company_name ASC, name ASC, id ASC`,
       params
     );
-    res.json(rows.map(mapCompanyRow));
+    res.json(rows.map(mapCustomerRow));
   } catch (err) {
-    console.error('Company fetch error:', err);
-    res.status(500).json({ success: false, message: 'Failed to fetch companies' });
+    console.error('Customer fetch error:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch customers' });
   }
 });
 
-app.post('/api/companies', authenticateToken, validateCompany, async (req, res) => {
+app.post('/api/companies', authenticateToken, validateCustomer, async (req, res) => {
   try {
     if (!isAdminUser(req.user)) return res.status(403).json({ success: false, message: 'Admin only access.' });
     const companyId = String(req.body.companyId || req.body.company_id_code || '').trim();
@@ -1199,16 +1240,16 @@ app.post('/api/companies', authenticateToken, validateCompany, async (req, res) 
     const [[company]] = await pool.execute('SELECT * FROM companies WHERE id = ?', [result.insertId]);
     res.json({
       success: true,
-      company: mapCompanyRow(company),
+      company: mapCustomerRow(company),
     });
   } catch (err) {
-    console.error('Company save error:', err);
+    console.error('Customer save error:', err);
     const duplicate = err.code === 'ER_DUP_ENTRY';
-    res.status(duplicate ? 409 : 500).json({ success: false, message: duplicate ? 'Company ID or username already exists.' : 'Failed to save company' });
+    res.status(duplicate ? 409 : 500).json({ success: false, message: duplicate ? 'Customer ID or username already exists.' : 'Failed to save customer' });
   }
 });
 
-app.put('/api/companies/:id', authenticateToken, validateCompany, async (req, res) => {
+app.put('/api/companies/:id', authenticateToken, validateCustomer, async (req, res) => {
   try {
     if (!isAdminUser(req.user)) return res.status(403).json({ success: false, message: 'Admin only access.' });
     const companyId = String(req.body.companyId || req.body.company_id_code || '').trim();
@@ -1259,13 +1300,13 @@ app.put('/api/companies/:id', authenticateToken, validateCompany, async (req, re
       WHERE id=?`,
       params
     );
-    if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'Company not found.' });
+    if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'Customer not found.' });
     const [[company]] = await pool.execute('SELECT * FROM companies WHERE id = ?', [req.params.id]);
-    res.json({ success: true, company: mapCompanyRow(company) });
+    res.json({ success: true, company: mapCustomerRow(company) });
   } catch (err) {
-    console.error('Company update error:', err);
+    console.error('Customer update error:', err);
     const duplicate = err.code === 'ER_DUP_ENTRY';
-    res.status(duplicate ? 409 : 500).json({ success: false, message: duplicate ? 'Company ID or username already exists.' : 'Failed to update company' });
+    res.status(duplicate ? 409 : 500).json({ success: false, message: duplicate ? 'Customer ID or username already exists.' : 'Failed to update customer' });
   }
 });
 
@@ -1273,12 +1314,12 @@ app.delete('/api/companies/:id', authenticateToken, async (req, res) => {
   try {
     if (!isAdminUser(req.user)) return res.status(403).json({ success: false, message: 'Admin only access.' });
     const [result] = await pool.execute('DELETE FROM companies WHERE id=?', [req.params.id]);
-    if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'Company not found.' });
+    if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'Customer not found.' });
     res.json({ success: true });
   } catch (err) {
-    console.error('Company delete error:', err);
+    console.error('Customer delete error:', err);
     const conflict = err.code === 'ER_ROW_IS_REFERENCED_2';
-    res.status(conflict ? 409 : 500).json({ success: false, message: conflict ? 'Company is linked to existing records and cannot be deleted.' : 'Failed to delete company' });
+    res.status(conflict ? 409 : 500).json({ success: false, message: conflict ? 'Customer is linked to existing records and cannot be deleted.' : 'Failed to delete customer' });
   }
 });
 
@@ -1891,7 +1932,7 @@ app.get('/api/supplies', authenticateToken, async (req, res) => {
     let where = [];
 
     if (!isAdminUser(req.user)) {
-      const company = await getCompanyForRequest(req.user);
+      const company = await getCustomerForRequest(req.user);
       if (!company) return res.json([]);
       where.push('(sc.company_id = ? OR sc.companyId = ?)');
       params.push(company.id, company.company_id_code);
@@ -2007,7 +2048,7 @@ app.get('/api/challans/company/:companyId', authenticateToken, async (req, res) 
   try {
     const { companyId } = req.params;
     if (!isAdminUser(req.user)) {
-      const company = await getCompanyForRequest(req.user);
+      const company = await getCustomerForRequest(req.user);
       if (!company || String(company.id) !== String(companyId)) return res.status(403).json({ success: false, message: 'Forbidden' });
     }
     const [rows] = await pool.execute(
@@ -2072,8 +2113,8 @@ app.get('/api/exports/:type', authenticateToken, async (req, res) => {
         res,
         rows.map((row) => ({
           'Order No': row.order_no,
-          'Company Code': row.company_id_code,
-          Company: row.company_name,
+          'Customer Code': row.company_id_code,
+          Customer: row.company_name,
           Requisition: row.requisition_no || '',
           'PO Date': row.po_date,
           Destination: row.destination,
@@ -2092,7 +2133,7 @@ app.get('/api/exports/:type', authenticateToken, async (req, res) => {
       const params = [];
       let where = '';
       if (!isAdminUser(req.user)) {
-        const company = await getCompanyForRequest(req.user);
+        const company = await getCustomerForRequest(req.user);
         if (!company) return sendWorkbook(res, [], 'Supplies', `maco_supplies_${today}.xlsx`);
         where = 'WHERE sc.company_id = ? OR sc.companyId = ?';
         params.push(company.id, company.company_id_code);
@@ -2114,8 +2155,8 @@ app.get('/api/exports/:type', authenticateToken, async (req, res) => {
         rows.map((row) => ({
           'Challan No': row.challan_no,
           'Order No': row.order_no || '',
-          'Company Code': row.company_id_code || '',
-          Company: row.company_name || '',
+          'Customer Code': row.company_id_code || '',
+          Customer: row.company_name || '',
           Carrier: row.method_name || '',
           'Challan Date': row.challan_date,
           Details: row.supply_details || '',
@@ -2183,3 +2224,4 @@ if (require.main === module) {
 
 module.exports = app;
 module.exports.dbReady = dbReady;
+

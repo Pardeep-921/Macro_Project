@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import PageHeader from '../../components/PageHeader';
 import DataTable from '../../components/DataTable';
-import { useCompanyController } from '../../../controllers/CompanyController';
+import { useCustomerController } from '../../../controllers/CustomerController';
 
 const initialFormData = {
     id: '',
@@ -27,13 +27,13 @@ const initialFormData = {
 };
 
 const textFields = [
-    ['companyId', 'Company Id', 'M10001', true],
-    ['name', 'Company Name', 'Enter company name', true],
+    ['companyId', 'Customer Id', 'M10001', true],
+    ['name', 'Customer Name', 'Enter customer name', true],
     ['username', 'Username', 'Login username', false],
     ['password', 'Password', 'Leave blank while editing', false, 'password'],
     ['first_name', 'First Name', 'Contact first name'],
     ['last_name', 'Last Name', 'Contact last name'],
-    ['email', 'Email ID', 'accounts@company.com', true, 'email'],
+    ['email', 'Email ID', 'accounts@customer.com', true, 'email'],
     ['contact', 'Contact No', '9876543210'],
     ['address_1', 'Address 1', 'Registered address'],
     ['address_2', 'Address 2', 'Optional address'],
@@ -42,21 +42,21 @@ const textFields = [
     ['pincode', 'Pincode', '110001'],
     ['pan_no', 'PAN No', 'ABCDE1234F'],
     ['gstin_no', 'GSTIN No', 'GSTIN number'],
-    ['registration_no', 'Registration No', 'Company registration']
+    ['registration_no', 'Registration No', 'Customer registration']
 ];
 
-export default function ManageCompany() {
-    const { companies, loading, fetchCompanies, handleSaveCompany, handleDeleteCompany } = useCompanyController();
+export default function ManageCustomer() {
+    const { customers, loading, fetchCustomers, handleSaveCustomer, handleDeleteCustomer } = useCustomerController();
     const [formData, setFormData] = useState(initialFormData);
     const [search, setSearch] = useState('');
 
-    const activeCompanies = companies.filter(company => company.isActive).length;
-    const inactiveCompanies = companies.length - activeCompanies;
+    const activeCustomers = customers.filter(customer => customer.isActive).length;
+    const inactiveCustomers = customers.length - activeCustomers;
     const isEditing = Boolean(formData.id);
 
     const columns = useMemo(() => [
-        { key: 'companyId', header: 'Company Id' },
-        { key: 'name', header: 'Company Name' },
+        { key: 'companyId', header: 'Customer Id' },
+        { key: 'name', header: 'Customer Name' },
         { key: 'username', header: 'Username' },
         { key: 'email', header: 'Email ID' },
         { key: 'contact', header: 'Contact No' },
@@ -66,7 +66,7 @@ export default function ManageCompany() {
             key: 'isActive',
             header: 'Status',
             render: (row) => (
-                <span className={`company-status-badge ${row.isActive ? 'is-active' : 'is-inactive'}`}>
+                <span className={`customer-status-badge ${row.isActive ? 'is-active' : 'is-inactive'}`}>
                     {row.isActive ? 'Active' : 'Inactive'}
                 </span>
             )
@@ -85,8 +85,8 @@ export default function ManageCompany() {
         setFormData(initialFormData);
     };
 
-    const submitCompany = async () => {
-        const saved = await handleSaveCompany({
+    const submitCustomer = async () => {
+        const saved = await handleSaveCustomer({
             ...formData,
             username: formData.username || formData.companyId
         });
@@ -95,13 +95,13 @@ export default function ManageCompany() {
 
     const onSubmit = (e) => {
         e.preventDefault();
-        submitCompany();
+        submitCustomer();
     };
 
     const onSearch = (e) => {
         const value = e.target.value;
         setSearch(value);
-        fetchCompanies(true, value);
+        fetchCustomers(true, value);
     };
 
     const onAction = (action, row) => {
@@ -116,42 +116,42 @@ export default function ManageCompany() {
             });
         }
         if (action === 'Delete') {
-            handleDeleteCompany(row.id);
+            handleDeleteCustomer(row.id);
         }
     };
 
     return (
-        <div className="manage-company-page">
+        <div className="manage-customer-page">
             <PageHeader title="Manage Customer Section" />
-            <div className="manage-company-shell">
-                <div className="company-summary-grid">
-                    <div className="company-summary-card">
-                        <span className="summary-label">Total Companies</span>
-                        <strong>{companies.length}</strong>
+            <div className="manage-customer-shell">
+                <div className="customer-summary-grid">
+                    <div className="customer-summary-card">
+                        <span className="summary-label">Total Customers</span>
+                        <strong>{customers.length}</strong>
                     </div>
-                    <div className="company-summary-card tone-success">
+                    <div className="customer-summary-card tone-success">
                         <span className="summary-label">Active Accounts</span>
-                        <strong>{activeCompanies}</strong>
+                        <strong>{activeCustomers}</strong>
                     </div>
-                    <div className="company-summary-card tone-muted">
+                    <div className="customer-summary-card tone-muted">
                         <span className="summary-label">Inactive Accounts</span>
-                        <strong>{inactiveCompanies}</strong>
+                        <strong>{inactiveCustomers}</strong>
                     </div>
                 </div>
 
-                <section className="company-panel">
-                    <div className="company-panel-header">
+                <section className="customer-panel">
+                    <div className="customer-panel-header">
                         <div>
-                            <span className="company-panel-kicker">Administration</span>
-                            <h2>{isEditing ? 'Update Company Account' : 'Manage Company Account'}</h2>
+                            <span className="customer-panel-kicker">Administration</span>
+                            <h2>{isEditing ? 'Update Customer Account' : 'Manage Customer Account'}</h2>
                         </div>
-                        <span className="company-panel-status">Company Master</span>
+                        <span className="customer-panel-status">Customer Master</span>
                     </div>
 
-                    <form id="company-form" className="company-form" onSubmit={onSubmit}>
-                        <div className="company-form-grid">
+                    <form id="customer-form" className="customer-form" onSubmit={onSubmit}>
+                        <div className="customer-form-grid">
                             {textFields.map(([name, label, placeholder, required, type = 'text']) => (
-                                <div className="company-field" key={name}>
+                                <div className="customer-field" key={name}>
                                     <label htmlFor={name}>{label} {required && <span>*</span>}</label>
                                     <input
                                         id={name}
@@ -164,7 +164,7 @@ export default function ManageCompany() {
                                     />
                                 </div>
                             ))}
-                            <div className="company-field">
+                            <div className="customer-field">
                                 <label htmlFor="role_master">Role</label>
                                 <select id="role_master" name="role_master" value={formData.role_master} onChange={handleChange}>
                                     <option value="CUSTOMER">Customer</option>
@@ -173,8 +173,8 @@ export default function ManageCompany() {
                             </div>
                         </div>
 
-                        <div className="company-form-actions">
-                            <label className="company-toggle" htmlFor="isActive">
+                        <div className="customer-form-actions">
+                            <label className="customer-toggle" htmlFor="isActive">
                                 <input name="isActive" type="checkbox" id="isActive" checked={formData.isActive} onChange={handleChange} />
                                 <span>Is Active</span>
                             </label>
@@ -186,28 +186,28 @@ export default function ManageCompany() {
                     </form>
                 </section>
 
-                <section className="company-panel company-table-panel">
-                    <div className="company-panel-header">
+                <section className="customer-panel customer-table-panel">
+                    <div className="customer-panel-header">
                         <div>
-                            <span className="company-panel-kicker">Directory</span>
-                            <h2>Company Data</h2>
+                            <span className="customer-panel-kicker">Directory</span>
+                            <h2>Customer Data</h2>
                         </div>
-                        <span className="company-record-count">{companies.length} Records</span>
+                        <span className="customer-record-count">{customers.length} Records</span>
                     </div>
 
-                    <div className="company-search-row">
+                    <div className="customer-search-row">
                         <input
                             type="search"
                             value={search}
                             onChange={onSearch}
-                            placeholder="Search company, username, city, PAN, TIN"
+                            placeholder="Search customer, username, city, PAN, TIN"
                         />
                     </div>
 
                     {loading ? (
-                        <div className="company-loading-state">Loading companies...</div>
+                        <div className="customer-loading-state">Loading customers...</div>
                     ) : (
-                        <DataTable columns={columns} data={companies} actions={['Edit', 'Delete']} onAction={onAction} />
+                        <DataTable columns={columns} data={customers} actions={['Edit', 'Delete']} onAction={onAction} />
                     )}
                 </section>
             </div>

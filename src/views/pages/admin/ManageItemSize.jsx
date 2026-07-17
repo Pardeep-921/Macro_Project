@@ -14,14 +14,14 @@ export default function ManageItemSize() {
     };
 
     const columns = [
-        { key: 'id', header: 'ID' },
-        { key: 'name', header: 'Size Code' },
-        { key: 'description', header: 'Description' }
+        { key: 'id', header: 'Item Size ID' },
+        { key: 'name', header: 'Item Size' },
+        { key: 'description', header: 'Item Size Description' }
     ];
 
     return (
         <MasterDataPage
-            title="Item Size"
+            title="Manage Item Size"
             description="Create reusable size values for products that need size-wise ordering or stock control."
             formTitle={formData.id ? 'Update Size' : 'Add Size'}
             formHint="Use compact size codes such as STD, 001, or 002 for cleaner reports."

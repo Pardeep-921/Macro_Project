@@ -2,20 +2,20 @@ import { useState, useEffect } from 'react';
 import { AuthModel } from '../models/AuthModel';
 import { useAuth } from '../context/useAuth';
 import { OrderModel } from '../models/OrderModel';
-import { CompanyModel } from '../models/CompanyModel';
+import { CustomerModel } from '../models/CustomerModel';
 
 export const useDashboardController = () => {
     const { user } = useAuth();
     const [stats, setStats] = useState({ pending: 0, accepted: 0, rejected: 0, pendingUsers: 0, revenue: 0 });
-    const [companies, setCompanies] = useState([]);
+    const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const fetchDashboardData = async () => {
         setLoading(true);
         try {
-            const [orders, companyData, users, dashboardStats] = await Promise.all([
+            const [orders, customerData, users, dashboardStats] = await Promise.all([
                 OrderModel.getDraftOrders(),
-                CompanyModel.getCompanies(),
+                CustomerModel.getCustomers(),
                 AuthModel.getPendingUsers(user?.token).catch(() => []),
                 OrderModel.getDashboardStats()
             ]);
@@ -41,7 +41,7 @@ export const useDashboardController = () => {
             newStats.pendingUsers = users.filter(u => u.status === 'pending').length;
 
             setStats(newStats);
-            setCompanies(companyData);
+            setCustomers(customerData);
         } catch (err) {
             console.error('Dashboard Fetch Error:', err);
         } finally {
@@ -53,5 +53,5 @@ export const useDashboardController = () => {
         fetchDashboardData();
     }, []);
 
-    return { stats, companies, loading };
+    return { stats, customers, loading };
 };

@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
 import { OrderModel } from '../models/OrderModel';
-import { CompanyModel } from '../models/CompanyModel';
+import { CustomerModel } from '../models/CustomerModel';
 
 export const useOrderController = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const [companies, setCompanies] = useState([]);
+    const [customers, setCustomers] = useState([]);
 
     const fetchOrders = async (silent = false) => {
         if (!silent) setLoading(true);
-        const [ordersData, companiesData] = await Promise.all([
+        const [ordersData, customersData] = await Promise.all([
             OrderModel.getDraftOrders(),
-            CompanyModel.getCompanies()
+            CustomerModel.getCustomers()
         ]);
         setOrders(ordersData);
-        setCompanies(companiesData);
+        setCustomers(customersData);
         setLoading(false);
     };
 
@@ -48,7 +48,7 @@ export const useOrderController = () => {
     return {
         orders,
         loading,
-        companies,
+        customers,
         approveOrders,
         rejectOrders,
         updateOrder,

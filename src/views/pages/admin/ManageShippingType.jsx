@@ -20,7 +20,7 @@ export default function ManageShippingType() {
 
     return (
         <MasterDataPage
-            title="Item Shipping"
+            title="Manage Item Shipping"
             description="Maintain transporter and shipping method names used while preparing supply and dispatch records."
             formTitle={formData.id ? 'Update Shipping Type' : 'Add Shipping Type'}
             formHint="These carrier names are used when challans and dispatch records are prepared."
@@ -40,7 +40,7 @@ export default function ManageShippingType() {
             stats={[{ label: 'Data Source', value: 'Database' }]}
         >
             <div className="form-group">
-                <label className="required-label">Shipping Type <span className="required">*</span></label>
+                <label className="required-label">Enter Shipping Type <span className="required">*</span></label>
                 <input
                     type="text"
                     className="login-input"

@@ -3,7 +3,7 @@ import PageHeader from '../../components/PageHeader';
 import { useDashboardController } from '../../../controllers/DashboardController';
 
 export default function AdminDashboard() {
-    const { stats, companies, loading } = useDashboardController();
+    const { stats, customers, loading } = useDashboardController();
     const statCards = [
         {
             label: 'Pending Orders',
@@ -40,16 +40,6 @@ export default function AdminDashboard() {
                     </span>
                 </div>
 
-                <div className="dashboard-stat-grid" aria-busy={loading}>
-                    {statCards.map((card) => (
-                        <article key={card.label} className={`dashboard-stat-card tone-${card.tone}`}>
-                            <div className="stat-label">{card.label}</div>
-                            <div className="stat-value">{card.value}</div>
-                            <div className="stat-helper">{card.helper}</div>
-                        </article>
-                    ))}
-                </div>
-
                 <div className="dashboard-filter-panel">
                     <div>
                         <h3>Quick Filter by Customer</h3>
@@ -59,12 +49,22 @@ export default function AdminDashboard() {
                         <option value="" disabled>
                             Select Customer
                         </option>
-                        {companies.map((company) => (
-                            <option key={company.companyId} value={company.companyId}>
-                                {company.name}
+                        {customers.map((customer) => (
+                            <option key={customer.companyId} value={customer.companyId}>
+                                {customer.name}
                             </option>
                         ))}
                     </select>
+                </div>
+
+                <div className="dashboard-stat-grid" aria-busy={loading}>
+                    {statCards.map((card) => (
+                        <article key={card.label} className={`dashboard-stat-card tone-${card.tone}`}>
+                            <div className="stat-label">{card.label}</div>
+                            <div className="stat-value">{card.value}</div>
+                            <div className="stat-helper">{card.helper}</div>
+                        </article>
+                    ))}
                 </div>
 
                 <p className="dashboard-note">

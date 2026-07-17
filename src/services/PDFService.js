@@ -145,7 +145,7 @@ export const PDFService = {
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     doc.text(`Order No: ${safe(challan.orderNo || challan.order_no)}`, 14, 48);
-    doc.text(`Company: ${safe(challan.companyName || challan.company_name)}`, 14, 56);
+    doc.text(`Customer: ${safe(challan.companyName || challan.company_name)}`, 14, 56);
     doc.text(`Carrier: ${safe(challan.carrierName || challan.carrier_name)}`, 14, 64);
     doc.text(`Challan Date: ${safe(challan.challanDate || challan.challan_date)}`, 148, 48);
 

@@ -1,23 +1,23 @@
 // src/controllers/SupplyController.js
 import { useState, useEffect } from 'react';
 import { SupplyModel } from '../models/SupplyModel';
-import { CompanyModel } from '../models/CompanyModel';
+import { CustomerModel } from '../models/CustomerModel';
 
 export const useSupplyController = () => {
     const [supplies, setSupplies] = useState([]);
-    const [companies, setCompanies] = useState([]);
+    const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     const fetchInitialData = async () => {
         setLoading(true);
         try {
-            const [supplyData, companyData] = await Promise.all([
+            const [supplyData, customerData] = await Promise.all([
                 SupplyModel.getSupplies(),
-                CompanyModel.getCompanies()
+                CustomerModel.getCustomers()
             ]);
             setSupplies(supplyData);
-            setCompanies(companyData);
+            setCustomers(customerData);
         } catch {
             setError('Failed to fetch supply data');
         } finally {
@@ -56,7 +56,7 @@ export const useSupplyController = () => {
 
     return {
         supplies,
-        companies,
+        customers,
         loading,
         error,
         searchSupplies,

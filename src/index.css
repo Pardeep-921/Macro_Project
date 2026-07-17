@@ -312,6 +312,27 @@ a:hover {
   padding: 15px 20px;
 }
 
+.alert {
+  margin: 12px 0;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.alert-success {
+  background-color: #edf8ef;
+  border-color: #b9dfc1;
+  color: #1f6f35;
+}
+
+.alert-danger {
+  background-color: #fff0ef;
+  border-color: #f3bbb6;
+  color: #9b261f;
+}
+
 /* ==========================================
    Forms
    ========================================== */
@@ -921,6 +942,7 @@ fieldset legend {
 .master-form .form-group input[type="email"],
 .master-form .form-group input[type="number"],
 .master-form .form-group input[type="date"],
+.master-form .form-group input[type="search"],
 .master-form .form-group select,
 .master-form .form-group textarea {
   min-height: 38px;
@@ -932,6 +954,13 @@ fieldset legend {
 
 .master-form .form-group textarea {
   min-height: 92px;
+}
+
+.master-form .field-note {
+  margin: 0;
+  color: #75685f;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .master-form .form-group input:focus,
@@ -1051,6 +1080,76 @@ fieldset legend {
   text-align: center;
 }
 
+.item-master-main {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.item-master-page .master-workspace {
+  align-items: start;
+}
+
+.item-master-page .master-side-panel {
+  align-self: start;
+}
+
+.item-master-section {
+  padding: 0;
+  overflow: hidden;
+}
+
+.item-master-titlebar {
+  padding: 7px 10px;
+  background: var(--orange-primary);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.item-master-form,
+.item-master-search-form {
+  margin: 0;
+  padding: 16px 20px;
+}
+
+.item-master-page .master-form .form-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+
+.item-master-page .master-form .form-group label {
+  flex: 0 0 210px;
+  padding-top: 0;
+  color: #121212;
+  font-weight: 700;
+}
+
+.item-master-page .master-form .form-group input[type="text"],
+.item-master-page .master-form .form-group input[type="password"],
+.item-master-page .master-form .form-group input[type="email"],
+.item-master-page .master-form .form-group input[type="number"],
+.item-master-page .master-form .form-group input[type="date"],
+.item-master-page .master-form .form-group input[type="search"],
+.item-master-page .master-form .form-group select,
+.item-master-page .master-form .form-group textarea {
+  min-height: 28px;
+  border-radius: 4px;
+}
+
+.item-master-actions {
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.item-master-search-form fieldset {
+  margin: 0;
+  border-color: #b7b7b7;
+  border-radius: 0;
+}
+
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -1127,25 +1226,25 @@ fieldset legend {
    Manage Company
    ========================================== */
 
-.manage-company-page {
+.manage-customer-page {
   min-height: 100%;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(245, 240, 235, 0.96)),
     var(--page-bg);
 }
 
-.manage-company-shell {
+.manage-customer-shell {
   padding: 20px 24px 28px;
 }
 
-.company-summary-grid {
+.customer-summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(180px, 1fr));
   gap: 14px;
   margin-bottom: 18px;
 }
 
-.company-summary-card {
+.customer-summary-card {
   min-height: 88px;
   padding: 16px 18px;
   background: #ffffff;
@@ -1155,15 +1254,15 @@ fieldset legend {
   box-shadow: 0 10px 22px rgba(80, 57, 38, 0.07);
 }
 
-.company-summary-card.tone-success {
+.customer-summary-card.tone-success {
   border-left-color: #198754;
 }
 
-.company-summary-card.tone-muted {
+.customer-summary-card.tone-muted {
   border-left-color: #707070;
 }
 
-.company-summary-card .summary-label {
+.customer-summary-card .summary-label {
   display: block;
   color: var(--text-medium);
   font-size: 12px;
@@ -1171,7 +1270,7 @@ fieldset legend {
   text-transform: uppercase;
 }
 
-.company-summary-card strong {
+.customer-summary-card strong {
   display: block;
   margin-top: 8px;
   color: var(--text-dark);
@@ -1179,18 +1278,18 @@ fieldset legend {
   line-height: 1;
 }
 
-.company-panel {
+.customer-panel {
   background: #ffffff;
   border: 1px solid #eadfd6;
   border-radius: 8px;
   box-shadow: 0 10px 24px rgba(80, 57, 38, 0.07);
 }
 
-.company-panel + .company-panel {
+.customer-panel + .customer-panel {
   margin-top: 18px;
 }
 
-.company-panel-header {
+.customer-panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1199,7 +1298,7 @@ fieldset legend {
   border-bottom: 1px solid #eadfd6;
 }
 
-.company-panel-kicker {
+.customer-panel-kicker {
   display: block;
   color: var(--orange-dark);
   font-size: 11px;
@@ -1208,15 +1307,15 @@ fieldset legend {
   text-transform: uppercase;
 }
 
-.company-panel-header h2 {
+.customer-panel-header h2 {
   margin-top: 2px;
   color: var(--text-dark);
   font-size: 18px;
   line-height: 1.2;
 }
 
-.company-panel-status,
-.company-record-count {
+.customer-panel-status,
+.customer-record-count {
   flex: 0 0 auto;
   padding: 5px 11px;
   border-radius: 999px;
@@ -1226,21 +1325,21 @@ fieldset legend {
   font-weight: 700;
 }
 
-.company-form {
+.customer-form {
   padding: 20px;
 }
 
-.company-form-grid {
+.customer-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(240px, 1fr));
   gap: 18px 22px;
 }
 
-.company-field {
+.customer-field {
   min-width: 0;
 }
 
-.company-field label {
+.customer-field label {
   display: block;
   margin-bottom: 7px;
   color: var(--text-label);
@@ -1248,13 +1347,13 @@ fieldset legend {
   font-weight: 700;
 }
 
-.company-field label span {
+.customer-field label span {
   color: var(--text-required);
 }
 
-.company-field input,
-.company-field select,
-.company-search-row input {
+.customer-field input,
+.customer-field select,
+.customer-search-row input {
   width: 100%;
   min-height: 40px;
   padding: 8px 11px;
@@ -1267,12 +1366,12 @@ fieldset legend {
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.company-field select {
+.customer-field select {
   appearance: none;
   color: var(--text-dark);
 }
 
-.company-field select option {
+.customer-field select option {
   color: var(--text-dark);
   background: #ffffff;
 }
@@ -1285,34 +1384,34 @@ fieldset legend {
   background: #ffffff !important;
 }
 
-.company-field input:focus,
-.company-field select:focus,
-.company-search-row input:focus {
+.customer-field input:focus,
+.customer-field select:focus,
+.customer-search-row input:focus {
   border-color: var(--orange-primary);
   box-shadow: 0 0 0 3px rgba(227, 122, 34, 0.14);
 }
 
-.company-field input::placeholder,
-.company-search-row input::placeholder {
+.customer-field input::placeholder,
+.customer-search-row input::placeholder {
   color: #9a9a9a;
 }
 
 /* Fix browser autofill turning text invisible */
-.company-field input:-webkit-autofill,
-.company-field input:-webkit-autofill:hover,
-.company-field input:-webkit-autofill:focus,
-.company-field select:-webkit-autofill,
-.company-field select:-webkit-autofill:hover,
-.company-field select:-webkit-autofill:focus,
-.company-search-row input:-webkit-autofill,
-.company-search-row input:-webkit-autofill:hover,
-.company-search-row input:-webkit-autofill:focus {
+.customer-field input:-webkit-autofill,
+.customer-field input:-webkit-autofill:hover,
+.customer-field input:-webkit-autofill:focus,
+.customer-field select:-webkit-autofill,
+.customer-field select:-webkit-autofill:hover,
+.customer-field select:-webkit-autofill:focus,
+.customer-search-row input:-webkit-autofill,
+.customer-search-row input:-webkit-autofill:hover,
+.customer-search-row input:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--text-dark) !important;
   -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
-.company-form-actions {
+.customer-form-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1322,11 +1421,11 @@ fieldset legend {
   border-top: 1px solid #f0e7df;
 }
 
-.company-form-actions .btn-group {
+.customer-form-actions .btn-group {
   margin: 0;
 }
 
-.company-toggle {
+.customer-toggle {
   display: inline-flex;
   align-items: center;
   gap: 9px;
@@ -1340,42 +1439,42 @@ fieldset legend {
   cursor: pointer;
 }
 
-.company-toggle input {
+.customer-toggle input {
   width: 16px;
   height: 16px;
   accent-color: #198754;
   cursor: pointer;
 }
 
-.company-table-panel {
+.customer-table-panel {
   padding-bottom: 20px;
 }
 
-.company-search-row {
+.customer-search-row {
   padding: 0 20px;
 }
 
-.company-table-panel .data-table-wrapper {
+.customer-table-panel .data-table-wrapper {
   margin: 18px 20px 0;
   border-radius: 6px;
   border-color: #e2d5cb;
 }
 
-.company-table-panel .data-table thead th {
+.customer-table-panel .data-table thead th {
   padding: 11px 14px;
   background: #d96e19;
   border-color: #c96214;
 }
 
-.company-table-panel .data-table tbody td {
+.customer-table-panel .data-table tbody td {
   padding: 11px 14px;
 }
 
-.company-table-panel .data-table tbody tr:hover {
+.customer-table-panel .data-table tbody tr:hover {
   background: #fff8ef;
 }
 
-.company-status-badge {
+.customer-status-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1386,17 +1485,17 @@ fieldset legend {
   font-weight: 700;
 }
 
-.company-status-badge.is-active {
+.customer-status-badge.is-active {
   background: #e8f5ee;
   color: #16794c;
 }
 
-.company-status-badge.is-inactive {
+.customer-status-badge.is-inactive {
   background: #f1f1f1;
   color: #666666;
 }
 
-.company-loading-state {
+.customer-loading-state {
   margin: 18px 20px 0;
   padding: 28px 20px;
   border: 1px dashed #d8c9be;
@@ -1724,6 +1823,150 @@ fieldset legend {
   padding: 16px 20px;
   border-top: 1px solid #f0e4db;
   background: #fffaf5;
+}
+
+.manage-order-card {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #d7d7d7;
+  border-radius: 5px;
+  box-shadow: 0 8px 20px rgba(80, 57, 38, 0.06);
+}
+
+.manage-order-titlebar {
+  margin: 20px 20px 0;
+  padding: 6px 10px;
+  background: var(--orange-primary);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.manage-order-info-page .order-supply-form {
+  padding: 8px 24px 14px;
+}
+
+.manage-order-info-page .order-supply-form fieldset,
+.manage-order-details fieldset {
+  position: relative;
+  margin: 0;
+  padding: 18px 16px 16px;
+  border: 1px solid #999;
+  border-radius: 0;
+}
+
+.manage-order-info-page .order-supply-form fieldset legend,
+.manage-order-details fieldset legend {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0 8px;
+  overflow: visible;
+  clip: auto;
+  color: var(--orange-dark);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.manage-order-info-page .order-supply-form .form-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 60px;
+}
+
+.manage-order-info-page .order-supply-form .form-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+}
+
+.manage-order-info-page .order-supply-form .form-group label {
+  flex: 0 0 160px;
+  color: #111111;
+  font-weight: 700;
+}
+
+.manage-order-info-page .order-supply-form .form-group input[type="text"],
+.manage-order-info-page .order-supply-form .form-group input[type="date"],
+.manage-order-info-page .order-supply-form .form-group select {
+  min-height: 28px;
+  border-radius: 4px;
+}
+
+.manage-order-total {
+  align-self: center;
+  color: #111111;
+  font-weight: 700;
+  text-align: center;
+}
+
+.manage-order-info-page .order-supply-form .btn-group {
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.manage-order-details {
+  padding: 0 24px 14px;
+}
+
+.manage-order-table-scroll {
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid #d0d0d0;
+}
+
+.manage-order-table {
+  min-width: 980px;
+}
+
+.manage-order-table thead th {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.manage-order-table tbody td {
+  vertical-align: middle;
+}
+
+.manage-order-table th:first-child,
+.manage-order-table td:first-child {
+  width: 48px;
+  text-align: center;
+}
+
+.manage-order-check-all {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.manage-order-pdf-link {
+  border: 0;
+  background: transparent;
+  color: #1f39ff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.manage-order-pdf-link:hover {
+  text-decoration: underline;
+}
+
+.manage-order-empty {
+  padding: 20px;
+  color: #777777;
+  text-align: center;
+}
+
+.manage-order-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 0 20px 20px;
 }
 
 /* ==========================================
@@ -2209,11 +2452,11 @@ img {
     display: none !important;
   }
 
-  .company-summary-grid {
+  .customer-summary-grid {
     grid-template-columns: repeat(3, minmax(140px, 1fr));
   }
 
-  .company-form-grid {
+  .customer-form-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
@@ -2260,7 +2503,7 @@ img {
     width: 100%;
   }
 
-  .manage-company-shell {
+  .manage-customer-shell {
     padding: 14px 12px 22px;
   }
 
@@ -2368,54 +2611,54 @@ img {
     flex-basis: auto;
   }
 
-  .company-summary-grid,
-  .company-form-grid {
+  .customer-summary-grid,
+  .customer-form-grid {
     grid-template-columns: 1fr;
   }
 
-  .company-summary-grid {
+  .customer-summary-grid {
     gap: 12px;
     margin-bottom: 14px;
   }
 
-  .company-summary-card {
+  .customer-summary-card {
     min-height: 76px;
     padding: 14px 16px;
   }
 
-  .company-summary-card strong {
+  .customer-summary-card strong {
     font-size: 24px;
   }
 
-  .company-panel-header,
-  .company-form-actions {
+  .customer-panel-header,
+  .customer-form-actions {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .company-panel-header {
+  .customer-panel-header {
     padding: 14px 16px;
   }
 
-  .company-panel-header h2 {
+  .customer-panel-header h2 {
     font-size: 16px;
   }
 
-  .company-form {
+  .customer-form {
     padding: 16px;
   }
 
-  .company-form-actions .btn-group {
+  .customer-form-actions .btn-group {
     width: 100%;
   }
 
-  .company-toggle {
+  .customer-toggle {
     width: 100%;
     justify-content: center;
   }
 
-  .company-table-panel .data-table-wrapper,
-  .company-loading-state {
+  .customer-table-panel .data-table-wrapper,
+  .customer-loading-state {
     margin-right: 16px;
     margin-left: 16px;
   }
@@ -2835,3 +3078,4 @@ img {
     .product-info-section { padding: 20px; }
     .info-grid { grid-template-columns: 1fr; }
 }
+

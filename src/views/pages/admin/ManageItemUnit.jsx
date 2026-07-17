@@ -14,14 +14,14 @@ export default function ManageItemUnit() {
     };
 
     const columns = [
-        { key: 'id', header: 'ID' },
+        { key: 'id', header: 'Unit ID' },
         { key: 'name', header: 'Unit Name' },
         { key: 'description', header: 'Description' }
     ];
 
     return (
         <MasterDataPage
-            title="Item Unit"
+            title="Manage Item Unit"
             description="Maintain unit of measure values used for product quantity, stock, and pricing."
             formTitle={formData.id ? 'Update Unit' : 'Add Unit'}
             formHint="Keep unit names concise, such as PCS, BOX, SET, or MTR."

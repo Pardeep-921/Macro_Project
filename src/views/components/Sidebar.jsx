@@ -12,7 +12,7 @@ const adminNavSections = [
         label: 'Administration',
         items: [
             { path: '/admin/user-approvals', label: 'User Approvals' },
-            { path: '/admin/manage-company', label: 'Manage Customer' },
+            { path: '/admin/manage-customer', label: 'Manage Customer' },
         ],
     },
     {
@@ -20,12 +20,12 @@ const adminNavSections = [
         key: 'master-data',
         label: 'Master Data',
         items: [
-            { path: '/admin/manage-primary-item', label: 'Primary Item Master' },
-            { path: '/admin/manage-sub-item', label: 'Sub Item Master' },
-            { path: '/admin/manage-item-master', label: 'Item Master' },
-            { path: '/admin/manage-item-unit', label: 'Item Unit' },
-            { path: '/admin/manage-shipping', label: 'Item Shipping' },
-            { path: '/admin/manage-item-size', label: 'Item Size' },
+            { path: '/admin/manage-primary-item', label: 'Manage Primary Group Master' },
+            { path: '/admin/manage-sub-item', label: 'Manage Sub Group Item Master' },
+            { path: '/admin/manage-item-master', label: 'Manage Item Master' },
+            { path: '/admin/manage-item-unit', label: 'Manage Item Unit' },
+            { path: '/admin/manage-item-size', label: 'Manage Item Size' },
+            { path: '/admin/manage-shipping', label: 'Manage Item Shipping' },
         ],
     },
     {
@@ -33,39 +33,21 @@ const adminNavSections = [
         key: 'orders-supply',
         label: 'Orders & Supply',
         items: [
-            { path: '/admin/manage-order', label: 'Order Info' },
+            { path: '/admin/manage-order', label: 'Manage Order Info' },
             { path: '/admin/upload-challan', label: 'Upload Challan' },
             { path: '/admin/track-supply', label: 'Track Supply' },
         ],
     },
-    {
-        type: 'section',
-        key: 'crm',
-        label: 'CRM',
-        items: [
-            { path: '/admin/manage-leads', label: 'Leads' },
-            { path: '/admin/manage-deals', label: 'Deals' },
-            { path: '/admin/manage-tasks', label: 'Tasks' },
-        ],
-    },
-    {
-        type: 'section',
-        key: 'reports',
-        label: 'Reports',
-        items: [{ path: '/admin/reports', label: 'Advanced Reporting' }],
-    },
+    { type: 'link', path: '/admin/setting', label: 'Setting' },
 ];
 
 const customerNavItems = [
     { path: '/customer/dashboard', label: 'Dashboard' },
     { path: '/customer/catalog', label: 'Product Marketplace' },
-
     { path: '/customer/add-item-cart', label: 'Add Item Cart' },
     { path: '/customer/manage-order', label: 'Manage Order' },
+    { path: '/customer/setting', label: 'Setting' },
     { path: '/customer/track-supply', label: 'Track Supply Details' },
-    { path: '/customer/manage-leads', label: 'My Leads' },
-    { path: '/customer/manage-deals', label: 'My Deals' },
-    { path: '/customer/manage-tasks', label: 'My Tasks' },
 ];
 
 export default function Sidebar({ userType = 'admin', isOpen = false, onClose }) {
