@@ -18,13 +18,10 @@ const initialFormData = {
     city: '',
     state: '',
     pincode: '',
-    fax: '',
-    ecc_no: '',
-    services_tax_no: '',
     pan_no: '',
+    gstin_no: '',
     registration_no: '',
     tin_no: '',
-    cst_no: '',
     role_master: 'CUSTOMER',
     isActive: true
 };
@@ -43,12 +40,8 @@ const textFields = [
     ['city', 'City', 'New Delhi'],
     ['state', 'State', 'Delhi'],
     ['pincode', 'Pincode', '110001'],
-    ['fax', 'Fax', 'Fax number'],
     ['pan_no', 'PAN No', 'ABCDE1234F'],
-    ['ecc_no', 'ECC No', 'ECC registration'],
-    ['tin_no', 'TIN No', 'TIN number'],
-    ['cst_no', 'CST No', 'CST number'],
-    ['services_tax_no', 'Service Tax No', 'Service tax number'],
+    ['gstin_no', 'GSTIN No', 'GSTIN number'],
     ['registration_no', 'Registration No', 'Company registration']
 ];
 
@@ -129,7 +122,7 @@ export default function ManageCompany() {
 
     return (
         <div className="manage-company-page">
-            <PageHeader title="Manage Company Section" />
+            <PageHeader title="Manage Customer Section" />
             <div className="manage-company-shell">
                 <div className="company-summary-grid">
                     <div className="company-summary-card">

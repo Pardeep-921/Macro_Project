@@ -4,20 +4,7 @@ import { useDashboardController } from '../../../controllers/DashboardController
 
 export default function AdminDashboard() {
     const { stats, companies, loading } = useDashboardController();
-    const formatCurrency = (amount) =>
-        new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            maximumFractionDigits: 0,
-        }).format(amount || 0);
-
     const statCards = [
-        {
-            label: 'Pending Approvals',
-            value: stats.pendingUsers,
-            helper: 'Users awaiting access',
-            tone: 'warning',
-        },
         {
             label: 'Pending Orders',
             value: stats.pending,
@@ -29,12 +16,6 @@ export default function AdminDashboard() {
             value: stats.accepted,
             helper: 'Successful transactions',
             tone: 'success',
-        },
-        {
-            label: 'Total Revenue',
-            value: formatCurrency(stats.revenue),
-            helper: 'From accepted orders',
-            tone: 'info',
         },
         {
             label: 'Rejected Orders',

@@ -18,6 +18,21 @@ const blankItemForm = {
     imageUrl: ''
 };
 
+const hiddenLegacyMarketplaceItems = new Set([
+    '101',
+    '102',
+    '103',
+    'Cotton Drill Fabric',
+    'Corrugated Packing Sheet',
+    'Nitrile Safety Gloves'
+]);
+
+const isHiddenLegacyMarketplaceItem = (product) => (
+    hiddenLegacyMarketplaceItems.has(String(product.id)) ||
+    hiddenLegacyMarketplaceItems.has(product.name) ||
+    hiddenLegacyMarketplaceItems.has(product.item_name)
+);
+
 export default function ProductCatalog() {
     const [savedItems, setSavedItems] = useState(getSavedMarketplaceItems);
     const [isAddItemOpen, setIsAddItemOpen] = useState(false);
@@ -25,7 +40,7 @@ export default function ProductCatalog() {
     const [imageFileName, setImageFileName] = useState('');
     const { products: apiProducts, loading } = useProductController();
     const navigate = useNavigate();
-    const products = [...apiProducts, ...savedItems, ...staticProducts];
+    const products = [...apiProducts, ...savedItems, ...staticProducts].filter(product => !isHiddenLegacyMarketplaceItem(product));
 
     const handleViewDetails = (product) => {
         const pathPrefix = window.location.pathname.startsWith('/admin') ? '/admin' : '/customer';

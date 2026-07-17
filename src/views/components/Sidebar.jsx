@@ -12,7 +12,7 @@ const adminNavSections = [
         label: 'Administration',
         items: [
             { path: '/admin/user-approvals', label: 'User Approvals' },
-            { path: '/admin/manage-company', label: 'Manage Company' },
+            { path: '/admin/manage-company', label: 'Manage Customer' },
         ],
     },
     {
