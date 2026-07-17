@@ -38,7 +38,7 @@ const adminNavSections = [
             { path: '/admin/track-supply', label: 'Track Supply' },
         ],
     },
-    { type: 'link', path: '/admin/setting', label: 'Setting' },
+    { type: 'link', path: '/admin/settings', label: 'Setting' },
 ];
 
 const customerNavItems = [
@@ -46,7 +46,7 @@ const customerNavItems = [
     { path: '/customer/catalog', label: 'Product Marketplace' },
     { path: '/customer/add-item-cart', label: 'Add Item Cart' },
     { path: '/customer/manage-order', label: 'Manage Order' },
-    { path: '/customer/setting', label: 'Setting' },
+    { path: '/customer/settings', label: 'Setting' },
     { path: '/customer/track-supply', label: 'Track Supply Details' },
 ];
 

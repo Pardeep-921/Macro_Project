@@ -30,9 +30,6 @@ export default function Product({ product, onViewDetails }) {
             </div>
             
             <div className="product-card-content">
-                {(product.category || product.categoryName) && (
-                    <span className="category-label">{product.category || product.categoryName}</span>
-                )}
                 <h3 className="product-title">{product.name}</h3>
                 {(product.description || product.specifications) && (
                     <p className="product-card-description">

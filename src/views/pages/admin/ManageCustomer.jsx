@@ -49,6 +49,7 @@ export default function ManageCustomer() {
     const { customers, loading, fetchCustomers, handleSaveCustomer, handleDeleteCustomer } = useCustomerController();
     const [formData, setFormData] = useState(initialFormData);
     const [search, setSearch] = useState('');
+    const [sameAsAddress1, setSameAsAddress1] = useState(false);
 
     const activeCustomers = customers.filter(customer => customer.isActive).length;
     const inactiveCustomers = customers.length - activeCustomers;
@@ -77,12 +78,22 @@ export default function ManageCustomer() {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: type === 'checkbox' ? checked : value,
+            ...(name === 'address_1' && sameAsAddress1 ? { address_2: value } : {})
         }));
     };
 
     const resetForm = () => {
         setFormData(initialFormData);
+        setSameAsAddress1(false);
+    };
+
+    const handleSameAddressToggle = (e) => {
+        const checked = e.target.checked;
+        setSameAsAddress1(checked);
+        if (checked) {
+            setFormData(prev => ({ ...prev, address_2: prev.address_1 }));
+        }
     };
 
     const submitCustomer = async () => {
@@ -114,6 +125,7 @@ export default function ManageCustomer() {
                 contact: row.contact || row.contact_no || '',
                 password: ''
             });
+            setSameAsAddress1(false);
         }
         if (action === 'Delete') {
             handleDeleteCustomer(row.id);
@@ -150,20 +162,36 @@ export default function ManageCustomer() {
 
                     <form id="customer-form" className="customer-form" onSubmit={onSubmit}>
                         <div className="customer-form-grid">
-                            {textFields.map(([name, label, placeholder, required, type = 'text']) => (
-                                <div className="customer-field" key={name}>
-                                    <label htmlFor={name}>{label} {required && <span>*</span>}</label>
-                                    <input
-                                        id={name}
-                                        name={name}
-                                        type={type}
-                                        required={Boolean(required)}
-                                        value={formData[name]}
-                                        onChange={handleChange}
-                                        placeholder={placeholder}
-                                    />
-                                </div>
-                            ))}
+                            {textFields.map(([name, label, placeholder, required, type = 'text']) => {
+                                const isAddress2 = name === 'address_2';
+
+                                return (
+                                    <div className="customer-field" key={name}>
+                                        <label htmlFor={name}>{label} {required && <span>*</span>}</label>
+                                        <input
+                                            id={name}
+                                            name={name}
+                                            type={type}
+                                            required={Boolean(required)}
+                                            value={formData[name]}
+                                            onChange={handleChange}
+                                            placeholder={placeholder}
+                                            readOnly={isAddress2 && sameAsAddress1}
+                                        />
+                                        {isAddress2 && (
+                                            <label className="customer-address-copy" htmlFor="sameAsAddress1">
+                                                <input
+                                                    id="sameAsAddress1"
+                                                    type="checkbox"
+                                                    checked={sameAsAddress1}
+                                                    onChange={handleSameAddressToggle}
+                                                />
+                                                <span>Same as Address 1</span>
+                                            </label>
+                                        )}
+                                    </div>
+                                );
+                            })}
                             <div className="customer-field">
                                 <label htmlFor="role_master">Role</label>
                                 <select id="role_master" name="role_master" value={formData.role_master} onChange={handleChange}>

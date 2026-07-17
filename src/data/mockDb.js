@@ -125,7 +125,74 @@ const seedData = {
         { id: 2, name: 'Delhivery Freight', method_name: 'Delhivery Freight' },
         { id: 3, name: 'VRL Logistics', method_name: 'VRL Logistics' }
     ],
-    products: [],
+    products: [
+        {
+            id: 101,
+            itemCode: 'FAB-COT-001',
+            item_code: 'FAB-COT-001',
+            name: 'Cotton Drill Fabric',
+            item_name: 'Cotton Drill Fabric',
+            primary_group_id: 1,
+            primaryGroupName: 'Textile Raw Material',
+            sub_group_id: 1,
+            subGroupName: 'Cotton Fabric',
+            item_size_id: 3,
+            size: 'Large',
+            unit_id: 1,
+            uom: 'Meters',
+            category: 'Industrial Fabric',
+            description: 'Heavy cotton drill fabric for uniforms and industrial applications.',
+            specifications: 'Heavy cotton drill fabric for uniforms and industrial applications.',
+            rate: 145,
+            list_price: 145,
+            mrp: 175,
+            imageUrl: 'https://via.placeholder.com/300x200?text=Cotton+Drill+Fabric'
+        },
+        {
+            id: 102,
+            itemCode: 'PKG-COR-001',
+            item_code: 'PKG-COR-001',
+            name: 'Corrugated Packing Sheet',
+            item_name: 'Corrugated Packing Sheet',
+            primary_group_id: 2,
+            primaryGroupName: 'Packaging',
+            sub_group_id: 2,
+            subGroupName: 'Corrugated Sheets',
+            item_size_id: 2,
+            size: 'Medium',
+            unit_id: 2,
+            uom: 'Pieces',
+            category: 'Packaging Material',
+            description: 'Corrugated sheet for safe dispatch packing.',
+            specifications: 'Corrugated sheet for safe dispatch packing.',
+            rate: 32,
+            list_price: 32,
+            mrp: 40,
+            imageUrl: 'https://via.placeholder.com/300x200?text=Corrugated+Sheet'
+        },
+        {
+            id: 103,
+            itemCode: 'SAFE-GLV-001',
+            item_code: 'SAFE-GLV-001',
+            name: 'Nitrile Safety Gloves',
+            item_name: 'Nitrile Safety Gloves',
+            primary_group_id: 1,
+            primaryGroupName: 'Textile Raw Material',
+            sub_group_id: 1,
+            subGroupName: 'Cotton Fabric',
+            item_size_id: 1,
+            size: 'Small',
+            unit_id: 2,
+            uom: 'Pieces',
+            category: 'Safety Supplies',
+            description: 'Industrial nitrile safety gloves for shop floor use.',
+            specifications: 'Industrial nitrile safety gloves for shop floor use.',
+            rate: 18,
+            list_price: 18,
+            mrp: 25,
+            imageUrl: 'https://via.placeholder.com/300x200?text=Nitrile+Gloves'
+        }
+    ],
     orders: [
         {
             id: 1,
@@ -214,16 +281,16 @@ const seedData = {
         }
     ],
     leads: [
-        { id: 1, name: 'Vertex Apparel', email: 'buying@vertex.demo', phone: '9000011111', status: 'New', companyId: 'M10004' },
-        { id: 2, name: 'Apex Packaging', email: 'ops@apex.demo', phone: '9000022222', status: 'Qualified', companyId: 'M10005' }
+        { id: 1, name: 'Vertex Apparel', email: 'buying@vertex.demo', phone: '9000011111', status: 'New', companyId: 'M10004', createdAt: '2026-07-14' },
+        { id: 2, name: 'Apex Packaging', email: 'ops@apex.demo', phone: '9000022222', status: 'Qualified', companyId: 'M10005', createdAt: '2026-07-15' }
     ],
     deals: [
-        { id: 1, name: 'Uniform Fabric Annual Supply', amount: 750000, stage: 'Proposal', leadId: 1 },
-        { id: 2, name: 'Packing Sheet Contract', amount: 340000, stage: 'Negotiation', leadId: 2 }
+        { id: 1, name: 'Uniform Fabric Annual Supply', amount: 750000, stage: 'Proposal', leadId: 1, createdAt: '2026-07-15' },
+        { id: 2, name: 'Packing Sheet Contract', amount: 340000, stage: 'Negotiation', leadId: 2, createdAt: '2026-07-16' }
     ],
     tasks: [
-        { id: 1, title: 'Send revised quote to Vertex', description: 'Include volume discount slab.', dueDate: '2026-07-20' },
-        { id: 2, title: 'Follow up on Blue Ridge payment', description: 'Confirm July statement.', dueDate: '2026-07-22' }
+        { id: 1, title: 'Send revised quote to Vertex', description: 'Include volume discount slab.', dueDate: '2026-07-20', status: 'Pending' },
+        { id: 2, title: 'Follow up on Blue Ridge payment', description: 'Confirm July statement.', dueDate: '2026-07-22', status: 'Pending' }
     ]
 };
 
@@ -238,7 +305,29 @@ function loadDb() {
         return clone(seedData);
     }
     try {
-        return { ...clone(seedData), ...JSON.parse(saved) };
+        const db = { ...clone(seedData), ...JSON.parse(saved) };
+        let shouldSave = false;
+        if (!Array.isArray(db.products) || db.products.length === 0) {
+            db.products = clone(seedData.products);
+            shouldSave = true;
+        }
+        db.leads = (db.leads || []).map((lead, index) => {
+            if (lead.createdAt) return lead;
+            shouldSave = true;
+            return { ...lead, createdAt: seedData.leads[index]?.createdAt || today };
+        });
+        db.deals = (db.deals || []).map((deal, index) => {
+            if (deal.createdAt) return deal;
+            shouldSave = true;
+            return { ...deal, createdAt: seedData.deals[index]?.createdAt || today };
+        });
+        db.tasks = (db.tasks || []).map(task => {
+            if (task.status) return task;
+            shouldSave = true;
+            return { ...task, status: 'Pending' };
+        });
+        if (shouldSave) saveDb(db);
+        return db;
     } catch {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData));
         return clone(seedData);
@@ -251,6 +340,20 @@ function saveDb(db) {
 
 function nextId(rows) {
     return Math.max(0, ...rows.map(row => Number(row.id) || 0)) + 1;
+}
+
+function getNextCustomerIdFromDb(db) {
+    const customerIds = [
+        ...db.companies.map(item => item.companyId || item.company_id_code),
+        ...db.pendingUsers.map(item => item.companyId || item.company_id_code || item.customerDetails?.companyId)
+    ];
+    const maxNumber = customerIds.reduce((max, value) => {
+        const match = String(value || '').match(/^M(\d+)$/i);
+        if (!match) return max;
+        return Math.max(max, Number.parseInt(match[1], 10));
+    }, 10000);
+
+    return `M${String(maxNumber + 1).padStart(5, '0')}`;
 }
 
 function normalizeOrderStatus(status) {
@@ -289,6 +392,61 @@ function collectionName(entity) {
     }[entity];
 }
 
+function buildActivityNotifications(db, viewer = {}) {
+    const role = String(viewer.role || '').toLowerCase();
+    const companyIdCode = viewer.companyIdCode;
+    const currentCompanyRow = companyIdCode
+        ? db.companies.find(company => company.companyId === companyIdCode || company.company_id_code === companyIdCode)
+        : null;
+    const currentCompanyId = currentCompanyRow?.id;
+    const isCustomer = role === 'customer';
+    const visibleOrders = isCustomer
+        ? db.orders.filter(order => Number(order.company_id) === Number(currentCompanyId))
+        : db.orders;
+    const visibleSupplies = isCustomer
+        ? db.supplies.filter(supply => supply.companyId === companyIdCode)
+        : db.supplies;
+
+    const activities = [
+        ...(!isCustomer
+            ? (db.pendingUsers || []).map(user => ({
+                id: `registration-${user.id}`,
+                type: 'registration',
+                title: `${user.fullname || user.company_name || 'New customer'} registered`,
+                message: `${user.email || 'Customer account'} is waiting for admin approval.`,
+                createdAt: user.createdAt || '2026-07-17T10:15:00.000Z'
+            }))
+            : []),
+        ...visibleOrders.map(order => ({
+            id: `order-${order.orderNo || order.order_no}`,
+            type: 'order',
+            title: `${order.customer || 'Customer'} placed ${order.orderNo || order.order_no}`,
+            message: `${order.status || 'Pending'} order worth Rs. ${Number(order.amount || order.net_amount || 0).toLocaleString('en-IN')}.`,
+            createdAt: `${order.poDate || order.po_date || today}T09:30:00.000Z`
+        })),
+        ...visibleSupplies.map(supply => ({
+            id: `supply-${supply.challanNo || supply.challan_no}`,
+            type: 'supply',
+            title: `Challan ${supply.challanNo || supply.challan_no} uploaded`,
+            message: `${supply.companyName || 'Customer'} supply update for order ${supply.orderNo || supply.order_no}.`,
+            createdAt: `${supply.challanDate || supply.challan_date || today}T13:20:00.000Z`
+        })),
+        ...(!isCustomer
+            ? (db.tasks || []).map(task => ({
+                id: `task-${task.id}`,
+                type: 'task',
+                title: task.title,
+                message: `${task.status || 'Pending'} task due on ${task.dueDate || today}.`,
+                createdAt: `${task.dueDate || today}T08:00:00.000Z`
+            }))
+            : [])
+    ];
+
+    return activities
+        .sort((first, second) => new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime())
+        .slice(0, 12);
+}
+
 export const MockDb = {
     reset() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(seedData));
@@ -316,15 +474,53 @@ export const MockDb = {
         };
     },
 
-    register(fullname, email, password, role = 'customer') {
+    register(fullname, email, password, role = 'customer', customerDetails = {}) {
         const db = loadDb();
-        if (db.users.some(user => user.email.toLowerCase() === String(email).toLowerCase())) {
+        const normalizedEmail = String(email).toLowerCase();
+        const emailExists = db.users.some(user => user.email.toLowerCase() === normalizedEmail) ||
+            db.pendingUsers.some(user => String(user.email).toLowerCase() === normalizedEmail);
+        if (emailExists) {
             throw new Error('This email already exists in the demo data.');
         }
-        const user = { id: nextId(db.pendingUsers), fullname, email, password, role, status: 'pending' };
+        const details = {
+            companyId: customerDetails.companyId,
+            company_id_code: customerDetails.companyId,
+            customerName: customerDetails.customerName,
+            company_name: customerDetails.customerName,
+            username: customerDetails.username,
+            first_name: customerDetails.firstName,
+            last_name: customerDetails.lastName,
+            contact: customerDetails.contact,
+            contact_no: customerDetails.contact,
+            address_1: customerDetails.address1,
+            address_2: customerDetails.address2,
+            city: customerDetails.city,
+            state: customerDetails.state,
+            pincode: customerDetails.pincode,
+            pan_no: customerDetails.panNo,
+            gstin_no: customerDetails.gstinNo,
+            registration_no: customerDetails.registrationNo,
+            role_master: 'CUSTOMER'
+        };
+        const user = {
+            id: nextId(db.pendingUsers),
+            fullname,
+            email,
+            password,
+            role,
+            status: 'pending',
+            createdAt: new Date().toISOString(),
+            customerDetails: details,
+            ...details
+        };
         db.pendingUsers.push(user);
         saveDb(db);
         return { success: true, user, message: 'Demo registration submitted for admin approval.' };
+    },
+
+    getNextCustomerId() {
+        const db = loadDb();
+        return getNextCustomerIdFromDb(db);
     },
 
     changePassword(username, currentPassword, newPassword) {
@@ -348,7 +544,58 @@ export const MockDb = {
     approveUser(id) {
         const db = loadDb();
         const user = db.pendingUsers.find(item => String(item.id) === String(id));
-        if (user) user.status = 'approved';
+        if (user) {
+            const details = user.customerDetails || user;
+            const companyId = details.companyId || details.company_id_code || getNextCustomerIdFromDb(db);
+            const companyName = details.customerName || details.company_name || user.fullname || 'Customer Account';
+            const username = details.username || user.username || user.email;
+            const customer = {
+                id: db.companies.find(item => item.companyId === companyId || item.company_id_code === companyId)?.id || nextId(db.companies),
+                companyId,
+                company_id_code: companyId,
+                name: companyName,
+                company_name: companyName,
+                username,
+                first_name: details.first_name || '',
+                last_name: details.last_name || '',
+                email: user.email,
+                contact: details.contact || details.contact_no || '',
+                contact_no: details.contact_no || details.contact || '',
+                address_1: details.address_1 || '',
+                address_2: details.address_2 || '',
+                city: details.city || '',
+                state: details.state || '',
+                pincode: details.pincode || '',
+                pan_no: details.pan_no || '',
+                gstin_no: details.gstin_no || '',
+                registration_no: details.registration_no || '',
+                role_master: 'CUSTOMER',
+                isActive: true,
+                is_active: true
+            };
+            const companyIndex = db.companies.findIndex(item => item.companyId === companyId || item.company_id_code === companyId);
+            if (companyIndex >= 0) db.companies[companyIndex] = { ...db.companies[companyIndex], ...customer };
+            else db.companies.push(customer);
+
+            const existingUserIndex = db.users.findIndex(item => String(item.email).toLowerCase() === String(user.email).toLowerCase());
+            const approvedUser = {
+                id: existingUserIndex >= 0 ? db.users[existingUserIndex].id : nextId(db.users),
+                email: user.email,
+                username,
+                password: user.password,
+                role: 'customer',
+                role_master: 'CUSTOMER',
+                fullname: user.fullname || companyName,
+                company_id_code: companyId,
+                status: 'approved'
+            };
+            if (existingUserIndex >= 0) db.users[existingUserIndex] = { ...db.users[existingUserIndex], ...approvedUser };
+            else db.users.push(approvedUser);
+
+            user.status = 'approved';
+            user.companyId = companyId;
+            user.company_id_code = companyId;
+        }
         saveDb(db);
         return { success: true };
     },
@@ -368,13 +615,16 @@ export const MockDb = {
     saveCustomer(customerData) {
         const db = loadDb();
         const id = customerData.id || nextId(db.companies);
+        const companyId = customerData.companyId || customerData.company_id_code || getNextCustomerIdFromDb(db);
+        const username = customerData.username || companyId;
         const customer = {
             ...customerData,
             id,
-            companyId: customerData.companyId || customerData.company_id_code,
-            company_id_code: customerData.companyId || customerData.company_id_code,
+            companyId,
+            company_id_code: companyId,
             name: customerData.name || customerData.company_name,
             company_name: customerData.name || customerData.company_name,
+            username,
             contact: customerData.contact || customerData.contact_no,
             contact_no: customerData.contact || customerData.contact_no,
             isActive: Boolean(customerData.isActive ?? customerData.is_active ?? true),
@@ -383,6 +633,26 @@ export const MockDb = {
         const index = db.companies.findIndex(item => String(item.id) === String(id));
         if (index >= 0) db.companies[index] = customer;
         else db.companies.push(customer);
+
+        if (customer.email) {
+            const userIndex = db.users.findIndex(user => String(user.email).toLowerCase() === String(customer.email).toLowerCase());
+            const existingUser = userIndex >= 0 ? db.users[userIndex] : {};
+            const userRecord = {
+                ...existingUser,
+                id: existingUser.id || nextId(db.users),
+                email: customer.email,
+                username,
+                password: customerData.password || existingUser.password || username,
+                role: String(customer.role_master || 'CUSTOMER').toLowerCase() === 'admin' ? 'admin' : 'customer',
+                role_master: customer.role_master || 'CUSTOMER',
+                fullname: customer.name,
+                company_id_code: companyId,
+                status: customer.isActive ? 'approved' : 'inactive'
+            };
+            if (userIndex >= 0) db.users[userIndex] = userRecord;
+            else db.users.push(userRecord);
+        }
+
         saveDb(db);
         return { success: true, customer };
     },
@@ -434,13 +704,19 @@ export const MockDb = {
         };
     },
 
+    getActivityNotifications(viewer = {}) {
+        return buildActivityNotifications(loadDb(), viewer);
+    },
+
     updateOrder(orderNo, data) {
         const db = loadDb();
         const order = db.orders.find(item => item.orderNo === orderNo);
         if (!order) return { success: false, message: 'Order not found' };
+        const nextStatus = normalizeOrderStatus(data.status || order.status);
         Object.assign(order, data, {
-            status: normalizeOrderStatus(data.status || order.status),
-            order_status: orderStatusCode(data.status || order.status)
+            status: nextStatus,
+            order_status: orderStatusCode(nextStatus),
+            ...(nextStatus === 'Accepted' || nextStatus === 'Rejected' ? { acceptDate: data.acceptDate || order.acceptDate || today } : {})
         });
         saveDb(db);
         return { success: true, order };
@@ -492,7 +768,19 @@ export const MockDb = {
     getMaster(entity, search = '') {
         const db = loadDb();
         const name = collectionName(entity);
-        return filterByText(db[name] || [], search, ['name', 'item_name', 'itemCode', 'item_code', 'category', 'description']);
+        return filterByText(db[name] || [], search, [
+            'name',
+            'item_name',
+            'itemCode',
+            'item_code',
+            'category',
+            'description',
+            'primaryGroupName',
+            'subGroupName',
+            'size',
+            'uom',
+            'chapter_heading_no'
+        ]);
     },
 
     saveMaster(entity, data, id) {
@@ -506,12 +794,24 @@ export const MockDb = {
         if (entity === 'units') next.unit_name = next.name || next.unit_name;
         if (entity === 'sizes') next.size_code = next.name || next.size_code;
         if (entity === 'products') {
+            const primaryGroup = db.primaryGroups.find(group => String(group.id) === String(next.primary_group_id));
+            const subGroup = db.subGroups.find(group => String(group.id) === String(next.sub_group_id));
+            const size = db.sizes.find(item => String(item.id) === String(next.item_size_id));
+            const unit = db.units.find(item => String(item.id) === String(next.unit_id));
             next.name = next.name || next.item_name;
             next.item_name = next.name;
             next.itemCode = next.itemCode || next.item_code || `ITEM-${next.id}`;
             next.item_code = next.itemCode;
+            next.primaryGroupName = primaryGroup?.name || primaryGroup?.group_name || next.primaryGroupName || '';
+            next.subGroupName = subGroup?.name || subGroup?.sub_group_name || next.subGroupName || '';
+            next.size = size?.name || size?.size_code || next.size || '';
+            next.uom = unit?.name || unit?.unit_name || next.uom || '';
+            next.category = next.primaryGroupName || next.category || 'Marketplace Item';
+            next.description = next.description || next.specifications || next.subGroupName || '';
+            next.specifications = next.specifications || next.description;
             next.rate = Number(next.rate || next.list_price || 0);
             next.list_price = next.rate;
+            next.mrp = Number(next.mrp || next.rate || 0);
             next.imageUrl = next.imageUrl || 'https://via.placeholder.com/300x200?text=Demo+Item';
         }
         const index = rows.findIndex(row => String(row.id) === String(next.id));
@@ -576,7 +876,7 @@ export const MockDb = {
 
     createLead(data) {
         const db = loadDb();
-        db.leads.unshift({ ...data, id: nextId(db.leads), status: data.status || 'New' });
+        db.leads.unshift({ ...data, id: nextId(db.leads), status: data.status || 'New', createdAt: today });
         saveDb(db);
         return { success: true };
     },
@@ -590,7 +890,8 @@ export const MockDb = {
             name: data.dealName || `Deal for ${lead?.name || 'Lead'}`,
             amount: Number(data.amount || 0),
             stage: 'Discovery',
-            leadId: Number(id)
+            leadId: Number(id),
+            createdAt: today
         });
         saveDb(db);
         return { success: true };
@@ -602,7 +903,7 @@ export const MockDb = {
 
     createDeal(data) {
         const db = loadDb();
-        db.deals.unshift({ ...data, id: nextId(db.deals), amount: Number(data.amount || 0) });
+        db.deals.unshift({ ...data, id: nextId(db.deals), amount: Number(data.amount || 0), stage: data.stage || 'Discovery', createdAt: today });
         saveDb(db);
         return { success: true };
     },
@@ -613,7 +914,7 @@ export const MockDb = {
 
     createTask(data) {
         const db = loadDb();
-        db.tasks.unshift({ ...data, id: nextId(db.tasks) });
+        db.tasks.unshift({ ...data, id: nextId(db.tasks), status: data.status || 'Pending' });
         saveDb(db);
         return { success: true };
     },

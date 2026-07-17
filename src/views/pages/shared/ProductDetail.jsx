@@ -13,6 +13,8 @@ export default function ProductDetail() {
     const [quantity, setQuantity] = useState(1);
     const [sendingRequest, setSendingRequest] = useState(false);
     const [message, setMessage] = useState('');
+    const displayRate = Number(product?.rate || product?.list_price || 0);
+    const displayUom = product?.uom || product?.unit || 'Piece';
 
     useEffect(() => {
         const marketplaceProducts = [...products, ...getSavedMarketplaceItems(), ...staticProducts];
@@ -65,8 +67,8 @@ export default function ProductDetail() {
                     
                     <div className="product-price-box">
                         <span className="price-label">Price:</span>
-                        <span className="price-value">₹{product.rate}</span>
-                        <span className="price-uom"> / {product.uom}</span>
+                        <span className="price-value">₹{displayRate.toLocaleString('en-IN')}</span>
+                        <span className="price-uom"> / {displayUom}</span>
                     </div>
 
                     <div className="product-description-content">

@@ -18,10 +18,6 @@ import ManageOrder from './views/pages/admin/ManageOrder';
 import UploadChallanDetails from './views/pages/admin/UploadChallanDetails';
 import TrackSupplyDetails from './views/pages/admin/TrackSupplyDetails';
 import PendingUsers from './views/pages/admin/PendingUsers'; // NEW
-import ManageLeads from './views/pages/admin/ManageLeads';
-import ManageDeals from './views/pages/admin/ManageDeals';
-import ManageTasks from './views/pages/admin/ManageTasks';
-import Reporting from './views/pages/admin/Reporting';
 
 // Customer Pages
 import ProductCatalog from './views/pages/customer/ProductCatalog';
@@ -58,10 +54,6 @@ function App() {
             <Route path="upload-challan" element={<UploadChallanDetails />} />
             <Route path="track-supply" element={<TrackSupplyDetails />} />
             <Route path="user-approvals" element={<PendingUsers />} /> {/* NEW */}
-            <Route path="manage-leads" element={<ManageLeads />} />
-            <Route path="manage-deals" element={<ManageDeals />} />
-            <Route path="manage-tasks" element={<ManageTasks />} />
-            <Route path="reports" element={<Reporting />} />
             <Route path="catalog" element={<ProductCatalog />} />
             <Route path="settings" element={<Settings />} />
             <Route path="product/:id" element={<ProductDetail />} />
@@ -77,9 +69,6 @@ function App() {
             <Route path="add-item-cart" element={<AddItemCart />} />
             <Route path="manage-order" element={<CustomerManageOrder />} />
             <Route path="track-supply" element={<CustomerTrackSupply />} />
-            <Route path="manage-leads" element={<ManageLeads />} />
-            <Route path="manage-deals" element={<ManageDeals />} />
-            <Route path="manage-tasks" element={<ManageTasks />} />
             <Route path="settings" element={<Settings />} />
             <Route path="product/:id" element={<ProductDetail />} />
 
