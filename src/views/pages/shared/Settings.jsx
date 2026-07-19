@@ -61,66 +61,67 @@ export default function Settings() {
         <div>
             <PageHeader title="Settings" />
 
-            <div className="content-card">
-                <div className="card-body">
-                    <div className="section-header-bar" style={{ marginTop: 0 }}>Account Settings</div>
+            {isAdmin && (
+                <div className="content-card">
+                    <div className="card-body">
+                        <div className="section-header-bar" style={{ marginTop: 0 }}>Account Settings</div>
 
-                    <div className="form-grid">
-                        <div className="form-group">
-                            <label>Name</label>
-                            <input type="text" value={displayName} readOnly />
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label>Name</label>
+                                <input type="text" value={displayName} readOnly />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Email</label>
+                                <input type="email" value={email} readOnly />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Role</label>
+                                <input type="text" value={roleLabel} readOnly />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Theme</label>
+                                <select defaultValue="default">
+                                    <option value="default">Default</option>
+                                    <option value="compact">Compact</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div className="form-group">
-                            <label>Email</label>
-                            <input type="email" value={email} readOnly />
+                        <div className="section-header-bar">Preferences</div>
+
+                        <div className="form-grid">
+                            <div className="form-group">
+                                <label>Dashboard View</label>
+                                <select defaultValue="standard">
+                                    <option value="standard">Standard</option>
+                                    <option value="summary">Summary</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Notifications</label>
+                                <select defaultValue="enabled">
+                                    <option value="enabled">Enabled</option>
+                                    <option value="disabled">Disabled</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div className="form-group">
-                            <label>Role</label>
-                            <input type="text" value={roleLabel} readOnly />
+                        <div className="btn-group">
+                            <button type="button" className="btn btn-primary">Save Settings</button>
+                            <button type="button" className="btn btn-secondary">Reset</button>
                         </div>
-
-                        <div className="form-group">
-                            <label>Theme</label>
-                            <select defaultValue="default">
-                                <option value="default">Default</option>
-                                <option value="compact">Compact</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="section-header-bar">Preferences</div>
-
-                    <div className="form-grid">
-                        <div className="form-group">
-                            <label>Dashboard View</label>
-                            <select defaultValue="standard">
-                                <option value="standard">Standard</option>
-                                <option value="summary">Summary</option>
-                            </select>
-                        </div>
-
-                        <div className="form-group">
-                            <label>Notifications</label>
-                            <select defaultValue="enabled">
-                                <option value="enabled">Enabled</option>
-                                <option value="disabled">Disabled</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="btn-group">
-                        <button type="button" className="btn btn-primary">Save Settings</button>
-                        <button type="button" className="btn btn-secondary">Reset</button>
                     </div>
                 </div>
-            </div>
+            )}
 
-            {isAdmin && (
-                <div className="content-card" style={{ marginTop: 16 }}>
+            <div className="content-card" style={{ marginTop: isAdmin ? 16 : 0 }}>
                     <div className="card-body">
-                        <div className="section-header-bar" style={{ marginTop: 0 }}>Change Admin Password</div>
+                        <div className="section-header-bar" style={{ marginTop: 0 }}>Change Password</div>
 
                         {passwordStatus.message && (
                             <div className={`alert ${passwordStatus.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
@@ -185,7 +186,6 @@ export default function Settings() {
                         </form>
                     </div>
                 </div>
-            )}
         </div>
     );
 }

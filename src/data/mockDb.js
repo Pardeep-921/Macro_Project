@@ -406,6 +406,33 @@ function buildActivityNotifications(db, viewer = {}) {
     const visibleSupplies = isCustomer
         ? db.supplies.filter(supply => supply.companyId === companyIdCode)
         : db.supplies;
+    const money = (value) => `Rs. ${Number(value || 0).toLocaleString('en-IN')}`;
+    const describeCustomerOrder = (order) => {
+        const status = normalizeOrderStatus(order.status || order.order_status);
+        const orderNo = order.orderNo || order.order_no;
+        if (status === 'Accepted') {
+            return {
+                title: `Order ${orderNo} accepted`,
+                message: `Admin accepted your order worth ${money(order.amount || order.net_amount)}.`
+            };
+        }
+        if (status === 'Rejected') {
+            return {
+                title: `Order ${orderNo} rejected`,
+                message: `Admin rejected your order worth ${money(order.amount || order.net_amount)}.`
+            };
+        }
+        if (status === 'Dispatched') {
+            return {
+                title: `Order ${orderNo} dispatched`,
+                message: `Your accepted order has been dispatched${order.trackingNo ? ` with tracking ${order.trackingNo}` : ''}.`
+            };
+        }
+        return {
+            title: `Order ${orderNo} placed`,
+            message: `Your order worth ${money(order.amount || order.net_amount)} is waiting for admin review.`
+        };
+    };
 
     const activities = [
         ...(!isCustomer
@@ -417,19 +444,55 @@ function buildActivityNotifications(db, viewer = {}) {
                 createdAt: user.createdAt || '2026-07-17T10:15:00.000Z'
             }))
             : []),
-        ...visibleOrders.map(order => ({
-            id: `order-${order.orderNo || order.order_no}`,
-            type: 'order',
-            title: `${order.customer || 'Customer'} placed ${order.orderNo || order.order_no}`,
-            message: `${order.status || 'Pending'} order worth Rs. ${Number(order.amount || order.net_amount || 0).toLocaleString('en-IN')}.`,
-            createdAt: `${order.poDate || order.po_date || today}T09:30:00.000Z`
-        })),
+        ...visibleOrders.map(order => {
+            const orderNo = order.orderNo || order.order_no;
+            const customerCopy = describeCustomerOrder(order);
+            return {
+                id: `order-${orderNo}-${order.order_status || order.status}`,
+                type: 'order',
+                title: isCustomer ? customerCopy.title : `${order.customer || 'Customer'} placed ${orderNo}`,
+                message: isCustomer
+                    ? customerCopy.message
+                    : `${order.status || 'Pending'} order worth ${money(order.amount || order.net_amount)}.`,
+                createdAt: `${order.acceptDate || order.review_date || order.poDate || order.po_date || today}T09:30:00.000Z`,
+                details: {
+                    heading: 'Order Details',
+                    rows: [
+                        ['Order No.', orderNo],
+                        ['Customer', order.customer || currentCompanyRow?.name || 'Customer'],
+                        ['Status', normalizeOrderStatus(order.status || order.order_status)],
+                        ['Requisition No.', order.requisition || order.requisition_no || '-'],
+                        ['PO Date', order.poDate || order.po_date || '-'],
+                        ['Review Date', order.acceptDate || order.review_date || '-'],
+                        ['Destination', order.destination || '-'],
+                        ['Payment Status', order.paymentStatus || '-'],
+                        ['Tracking No.', order.trackingNo || '-'],
+                        ['Amount', money(order.amount || order.net_amount)]
+                    ],
+                    items: db.orderItems?.[orderNo] || []
+                }
+            };
+        }),
         ...visibleSupplies.map(supply => ({
             id: `supply-${supply.challanNo || supply.challan_no}`,
             type: 'supply',
-            title: `Challan ${supply.challanNo || supply.challan_no} uploaded`,
-            message: `${supply.companyName || 'Customer'} supply update for order ${supply.orderNo || supply.order_no}.`,
-            createdAt: `${supply.challanDate || supply.challan_date || today}T13:20:00.000Z`
+            title: isCustomer ? `Supply update for ${supply.orderNo || supply.order_no}` : `Challan ${supply.challanNo || supply.challan_no} uploaded`,
+            message: isCustomer
+                ? `Challan ${supply.challanNo || supply.challan_no} was uploaded for your order.`
+                : `${supply.companyName || 'Customer'} supply update for order ${supply.orderNo || supply.order_no}.`,
+            createdAt: `${supply.challanDate || supply.challan_date || today}T13:20:00.000Z`,
+            details: {
+                heading: 'Supply Details',
+                rows: [
+                    ['Challan No.', supply.challanNo || supply.challan_no || '-'],
+                    ['Order No.', supply.orderNo || supply.order_no || '-'],
+                    ['Customer', supply.companyName || 'Customer'],
+                    ['Carrier', supply.carrierName || '-'],
+                    ['Challan Date', supply.challanDate || supply.challan_date || '-'],
+                    ['Quantity', supply.quantity || '-'],
+                    ['Supply Details', supply.supplyDetails || '-']
+                ]
+            }
         })),
         ...(!isCustomer
             ? (db.tasks || []).map(task => ({
@@ -464,11 +527,18 @@ export const MockDb = {
         if (!user || !passwordMatches) {
             throw new Error('Use admin/admin, customer/customer, or the demo email accounts with password demo123');
         }
+        const company = user.company_id_code
+            ? db.companies.find(item => item.companyId === user.company_id_code || item.company_id_code === user.company_id_code)
+            : null;
+        const displayName = company?.company_name || company?.name || user.fullname || user.username;
         return {
             success: true,
             role: user.role,
             roleMaster: user.role_master,
             username: user.username,
+            fullname: user.fullname,
+            companyName: company?.company_name || company?.name,
+            displayName,
             companyIdCode: user.company_id_code,
             token: `demo-token-${user.role}`
         };
@@ -526,15 +596,15 @@ export const MockDb = {
     changePassword(username, currentPassword, newPassword) {
         const db = loadDb();
         const user = db.users.find(item => item.username === username);
-        if (!user || user.role !== 'admin') {
-            throw new Error('Only an administrator can change the admin password.');
+        if (!user) {
+            throw new Error('User account was not found.');
         }
         if (user.password !== currentPassword && user.username !== currentPassword) {
             throw new Error('Current password is incorrect.');
         }
         user.password = newPassword;
         saveDb(db);
-        return { success: true, message: 'Admin password updated successfully.' };
+        return { success: true, message: 'Password updated successfully.' };
     },
 
     getPendingUsers() {

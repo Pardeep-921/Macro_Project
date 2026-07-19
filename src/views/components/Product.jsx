@@ -14,6 +14,9 @@ export default function Product({ product, onViewDetails }) {
 
     const handleContact = (e) => {
         e.stopPropagation();
+        if (!isAdmin) {
+            onViewDetails(product);
+        }
     };
 
     return (
@@ -44,7 +47,11 @@ export default function Product({ product, onViewDetails }) {
                 )}
                 
                 <div className={`product-card-footer ${isAdmin ? 'is-admin' : ''}`}>
-                    <button className="btn-action-primary" onClick={handleContact}>Contact supplier</button>
+                    {!isAdmin && (
+                        <button className="btn-action-primary" onClick={handleContact}>
+                            View Product
+                        </button>
+                    )}
                     {isAdmin && (
                         <button className="btn-action-secondary" onClick={handleEdit}>
                             Edit Item

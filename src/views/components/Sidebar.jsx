@@ -46,8 +46,8 @@ const customerNavItems = [
     { path: '/customer/catalog', label: 'Product Marketplace' },
     { path: '/customer/add-item-cart', label: 'Add Item Cart' },
     { path: '/customer/manage-order', label: 'Manage Order' },
-    { path: '/customer/settings', label: 'Setting' },
     { path: '/customer/track-supply', label: 'Track Supply Details' },
+    { path: '/customer/settings', label: 'Setting' },
 ];
 
 export default function Sidebar({ userType = 'admin', isOpen = false, onClose }) {
@@ -55,7 +55,7 @@ export default function Sidebar({ userType = 'admin', isOpen = false, onClose })
     const location = useLocation();
     const { logout, user } = useAuth();
     const [openSections, setOpenSections] = useState({});
-    const welcomeLabel = user?.username?.toUpperCase() || (userType === 'admin' ? 'ADMIN' : 'USER');
+    const welcomeLabel = user?.displayName || user?.companyName || user?.fullname || user?.username || (userType === 'admin' ? 'ADMIN' : 'USER');
 
     const isPathActive = useCallback(
         (path) => location.pathname === path || location.pathname.startsWith(`${path}/`),

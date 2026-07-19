@@ -1,224 +1,154 @@
-.product-detail-container {
-    padding: 2.5rem;
-    max-width: 1200px;
-    margin: 0 auto;
-    background: #fdfdfd;
-    min-height: 80vh;
+.product-sheet-page {
+    min-height: 100%;
+    padding: 18px 24px 36px;
+    background: #f3f6f8;
+}
+
+.sheet-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 10px;
 }
 
 .back-btn {
-    background: none;
-    border: none;
-    color: #4a5568;
-    font-weight: 600;
+    border: 1px solid #9ca3af;
+    background: #ffffff;
+    color: #111827;
+    border-radius: 2px;
+    min-height: 32px;
+    padding: 6px 12px;
+    font-weight: 700;
     cursor: pointer;
-    margin-bottom: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: color 0.2s;
 }
 
 .back-btn:hover {
-    color: #2b6cb0;
+    background: #f9fafb;
 }
 
-.product-detail-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    background: white;
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+.excel-sheet {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+    background-color: #ffffff;
+    background-image:
+        linear-gradient(#e5e7eb 1px, transparent 1px),
+        linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
+    background-size: 56px 18px;
+    border: 1px solid #000000;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+    overflow-x: auto;
 }
 
-.main-product-image {
-    width: 100%;
-    border-radius: 12px;
-    object-fit: contain;
-    background: #f8fafc;
-    border: 1px solid #edf2f7;
-    max-height: 500px;
+.sheet-title {
+    min-width: 760px;
+    padding: 0 2px 14px;
+    border-bottom: 1px solid #000000;
 }
 
-.product-category-tag {
-    background: #ebf8ff;
-    color: #2b6cb0;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    display: inline-block;
-    margin-bottom: 1rem;
-}
-
-.product-name-title {
-    font-size: 2.25rem;
+.sheet-title h1 {
+    margin: 0;
+    color: #000000;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 17px;
     font-weight: 800;
-    color: #1a202c;
-    margin-bottom: 1.5rem;
+    line-height: 1.18;
+}
+
+.sheet-title p {
+    margin: 0;
+    color: #000000;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 15px;
+    font-weight: 800;
     line-height: 1.2;
 }
 
-.product-price-box {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: #f7fafc;
-    border-radius: 12px;
+.sub-product-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    table-layout: fixed;
+    color: #000000;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 1.1;
 }
 
-.price-label {
-    color: #718096;
-    font-weight: 500;
+.sub-product-table th,
+.sub-product-table td {
+    border: 1px solid #000000;
+    padding: 1px 4px;
+    vertical-align: middle;
 }
 
-.price-value {
-    font-size: 2rem;
+.sub-product-table th {
+    height: 72px;
+    background: #ffffff;
+    text-align: center;
     font-weight: 800;
-    color: #2d3748;
 }
 
-.price-uom {
-    color: #718096;
-}
-
-.product-description-content h3 {
-    font-size: 1.25rem;
-    color: #2d3748;
-    margin-bottom: 0.75rem;
-}
-
-.product-description-content p {
-    color: #4a5568;
-    line-height: 1.7;
-    margin-bottom: 2rem;
-}
-
-.supplier-dashboard-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.supplier-dashboard-card h4 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    color: #2d3748;
-}
-
-.supplier-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.sup-item {
-    display: flex;
-    flex-direction: column;
-}
-
-.sup-item .label {
-    font-size: 0.75rem;
-    color: #a0aec0;
-    text-transform: uppercase;
-}
-
-.sup-item .val {
-    font-weight: 600;
-    color: #4a5568;
-}
-
-.action-feedback-msg {
-    padding: 1rem;
-    background: #f0fff4;
-    color: #38a169;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    font-weight: 600;
-}
-
-.product-action-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.qty-selector {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.qty-input-group {
-    display: flex;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.qty-input-group button {
-    padding: 0.5rem 1rem;
-    background: #f7fafc;
-    border: none;
-    cursor: pointer;
-}
-
-.qty-input-group input {
-    width: 60px;
-    text-align: center;
-    border: none;
-    border-left: 1px solid #e2e8f0;
-    border-right: 1px solid #e2e8f0;
-}
-
-.action-buttons-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.btn-add-cart, .btn-buy-now {
-    padding: 1rem;
-    border-radius: 8px;
+.sub-product-table td {
+    height: 15px;
+    background: rgba(255, 255, 255, 0.78);
     font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.1s, background 0.2s;
 }
 
-.btn-add-cart {
-    background: white;
-    border: 2px solid #2d3748;
-    color: #2d3748;
+.col-serial {
+    width: 44px;
 }
 
-.btn-add-cart:hover {
-    background: #edf2f7;
+.col-code {
+    width: 92px;
 }
 
-.btn-buy-now {
-    background: #2d3748;
-    border: none;
-    color: white;
+.col-uom {
+    width: 78px;
 }
 
-.btn-buy-now:hover {
-    background: #1a202c;
+.col-price {
+    width: 86px;
 }
 
-.btn-buy-now:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.group-heading-row td {
+    height: 18px;
+    background: #ffffff;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 16px;
+    font-weight: 900;
+    text-align: left;
 }
 
-@media (max-width: 968px) {
-    .product-detail-layout {
-        grid-template-columns: 1fr;
+.group-subheading-row td {
+    height: 16px;
+    background: #ffffff;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 12px;
+    font-weight: 900;
+    text-align: left;
+}
+
+.suitable-cell {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sub-product-table td:not(.suitable-cell) {
+    text-align: center;
+}
+
+.sub-product-table td:nth-child(5),
+.sub-product-table td:nth-child(6) {
+    text-align: right;
+}
+
+.selected-sheet-row td {
+    background: #eef6ff;
+}
+
+@media (max-width: 900px) {
+    .product-sheet-page {
+        padding: 14px 12px 28px;
     }
 }

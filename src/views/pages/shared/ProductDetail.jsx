@@ -1,130 +1,170 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useProductController } from '../../../controllers/ProductController';
-import PageHeader from '../../components/PageHeader';
 import { getSavedMarketplaceItems, staticProducts } from '../../../data/marketplaceProducts';
 import './product-detail.css';
+
+const productFamilyWords = [
+    'clutch',
+    'brake',
+    'piston',
+    'engine',
+    'motorcycle',
+    'transmission',
+    'connecting',
+    'valve',
+    'shoe',
+    'plate'
+];
+
+const asText = (value) => String(value || '').trim().toLowerCase();
+const getProductName = (product) => product?.name || product?.item_name || 'Product';
+const getProductCode = (product) => product?.itemCode || product?.item_code || product?.id || '-';
+const getProductUom = (product) => product?.uom || product?.unit || 'Each';
+const getProductRate = (product) => Number(product?.rate || product?.list_price || 0);
+const getProductMrp = (product) => Number(product?.mrp || getProductRate(product) * 1.8 || 0);
+const getProductGroup = (product) => (
+    product?.primaryGroupName ||
+    product?.primary_group_name ||
+    product?.subGroupName ||
+    product?.sub_group_name ||
+    product?.category ||
+    product?.categoryName ||
+    'RELATED ITEMS'
+);
+
+const getProductDescription = (product) => (
+    product?.description ||
+    product?.specifications ||
+    product?.subGroupName ||
+    product?.sub_group_name ||
+    getProductName(product)
+);
+
+const getProductFamily = (product) => {
+    const haystack = `${getProductName(product)} ${product?.category || ''} ${getProductDescription(product)}`.toLowerCase();
+    return productFamilyWords.find(word => haystack.includes(word)) || '';
+};
+
+const isSameProduct = (left, right) => String(left?.id) === String(right?.id);
+
+const isRelatedProduct = (selected, candidate) => {
+    if (!selected || !candidate || isSameProduct(selected, candidate)) return false;
+
+    const selectedSubGroupId = selected.sub_group_id || selected.subGroupId || selected.categoryId;
+    const candidateSubGroupId = candidate.sub_group_id || candidate.subGroupId || candidate.categoryId;
+    if (selectedSubGroupId && candidateSubGroupId && String(selectedSubGroupId) === String(candidateSubGroupId)) {
+        return true;
+    }
+
+    const selectedCategory = asText(selected.category || selected.categoryName || selected.subGroupName || selected.sub_group_name);
+    const candidateCategory = asText(candidate.category || candidate.categoryName || candidate.subGroupName || candidate.sub_group_name);
+    if (selectedCategory && candidateCategory && selectedCategory === candidateCategory) {
+        return true;
+    }
+
+    const selectedPrimaryGroupId = selected.primary_group_id || selected.primaryGroupId;
+    const candidatePrimaryGroupId = candidate.primary_group_id || candidate.primaryGroupId;
+    if (selectedPrimaryGroupId && candidatePrimaryGroupId && String(selectedPrimaryGroupId) === String(candidatePrimaryGroupId)) {
+        return true;
+    }
+
+    const selectedFamily = getProductFamily(selected);
+    return selectedFamily && selectedFamily === getProductFamily(candidate);
+};
+
+const groupProducts = (items) => items.reduce((groups, item) => {
+    const groupName = getProductGroup(item).toUpperCase();
+    return {
+        ...groups,
+        [groupName]: [...(groups[groupName] || []), item]
+    };
+}, {});
 
 export default function ProductDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { products, addToCart, loading } = useProductController();
+    const { products, loading } = useProductController();
     const [product, setProduct] = useState(null);
-    const [quantity, setQuantity] = useState(1);
-    const [sendingRequest, setSendingRequest] = useState(false);
-    const [message, setMessage] = useState('');
-    const displayRate = Number(product?.rate || product?.list_price || 0);
-    const displayUom = product?.uom || product?.unit || 'Piece';
+
+    const marketplaceProducts = useMemo(() => (
+        [...products, ...getSavedMarketplaceItems(), ...staticProducts]
+    ), [products]);
+
+    const sheetProducts = useMemo(() => {
+        if (!product) return [];
+
+        const related = marketplaceProducts.filter(candidate => isRelatedProduct(product, candidate));
+        const fallback = marketplaceProducts.filter(candidate => !isSameProduct(product, candidate));
+        return [product, ...(related.length ? related : fallback)].slice(0, 30);
+    }, [marketplaceProducts, product]);
+
+    const groupedProducts = useMemo(() => groupProducts(sheetProducts), [sheetProducts]);
 
     useEffect(() => {
-        const marketplaceProducts = [...products, ...getSavedMarketplaceItems(), ...staticProducts];
-        const found = marketplaceProducts.find(p => p.id.toString() === id);
+        const found = marketplaceProducts.find(p => String(p.id) === String(id));
         setProduct(found || null);
-    }, [products, id]);
-
-    const handleAddToCart = () => {
-        if (!product) return;
-        addToCart(product, [{
-            size: product.size || product.size_code || 'STD',
-            size_id: product.item_size_id,
-            qty: quantity
-        }]);
-        setMessage('Product added to cart successfully!');
-        setTimeout(() => setMessage(''), 3000);
-    };
-
-    const handleSendRequest = async () => {
-        setSendingRequest(true);
-        // Simulate sending request to supplier/admin
-        setTimeout(() => {
-            setSendingRequest(false);
-            setMessage('Purchase request sent to supplier successfully!');
-            setTimeout(() => setMessage(''), 3000);
-        }, 1500);
-    };
+    }, [marketplaceProducts, id]);
 
     if (loading && !product) return <div className="text-center mt-20">Loading Product Details...</div>;
     if (!product && !loading) return <div className="text-center mt-20">Product not found.</div>;
 
+    let serialNo = 1;
+
     return (
-        <div className="product-detail-container">
-            <button className="back-btn" onClick={() => navigate(-1)}>
-                ← Back to Catalog
-            </button>
-
-            <div className="product-detail-layout">
-                <div className="product-image-section">
-                    <img 
-                        src={product.imageUrl || 'https://via.placeholder.com/600x400?text=Product+Image'} 
-                        alt={product.name} 
-                        className="main-product-image"
-                    />
-                </div>
-
-                <div className="product-info-section">
-                    <span className="product-category-tag">{product.category || product.categoryName || 'Marketplace Item'}</span>
-                    <h1 className="product-name-title">{product.name}</h1>
-                    
-                    <div className="product-price-box">
-                        <span className="price-label">Price:</span>
-                        <span className="price-value">₹{displayRate.toLocaleString('en-IN')}</span>
-                        <span className="price-uom"> / {displayUom}</span>
-                    </div>
-
-                    <div className="product-description-content">
-                        <h3>Product Description</h3>
-                        <p>{product.description || product.specifications || 'No detailed description available for this industrial part.'}</p>
-                    </div>
-
-                    <div className="supplier-dashboard-card">
-                        <h4>Supplier Information</h4>
-                        <div className="supplier-grid">
-                            <div className="sup-item">
-                                <span className="label">Customer:</span>
-                                <span className="val">{product.supplierName || 'Maco Automotive'}</span>
-                            </div>
-                            <div className="sup-item">
-                                <span className="label">Location:</span>
-                                <span className="val">{product.location || 'New Delhi'}</span>
-                            </div>
-                            <div className="sup-item">
-                                <span className="label">Experience:</span>
-                                <span className="val">{product.experienceYears || '15'}+ Years</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {message && <div className="action-feedback-msg">{message}</div>}
-
-                    <div className="product-action-controls">
-                        <div className="qty-selector">
-                            <label>Quantity:</label>
-                            <div className="qty-input-group">
-                                <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button>
-                                <input 
-                                    type="number" 
-                                    value={quantity} 
-                                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                />
-                                <button onClick={() => setQuantity(quantity + 1)}>+</button>
-                            </div>
-                        </div>
-
-                        <div className="action-buttons-group">
-                            <button className="btn-add-cart" onClick={handleAddToCart}>
-                                Add to Cart
-                            </button>
-                            <button 
-                                className="btn-buy-now" 
-                                onClick={handleSendRequest}
-                                disabled={sendingRequest}
-                            >
-                                {sendingRequest ? 'Sending Request...' : 'Buy / Request Quote'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <div className="product-sheet-page">
+            <div className="sheet-actions">
+                <button className="back-btn" onClick={() => navigate(-1)}>
+                    Back to Catalog
+                </button>
             </div>
+
+            <section className="excel-sheet" aria-label="Related sub products">
+                <div className="sheet-title">
+                    <h1>{getProductName(product).toUpperCase()}</h1>
+                    <p>{product.hsnCode || product.hsn_code || '(HSN CODE 84099114 - GST RATE @ 28%)'}</p>
+                </div>
+
+                <table className="sub-product-table">
+                    <thead>
+                        <tr>
+                            <th className="col-serial">S. No.</th>
+                            <th className="col-code">Maco No.</th>
+                            <th>Suitable for</th>
+                            <th className="col-uom">PCS<br />Per<br />Set</th>
+                            <th className="col-price">List<br />Price<br />(Rs.)</th>
+                            <th className="col-price">M.R.P.<br />Inclusive<br />All Taxes<br />(Rs.)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Object.entries(groupedProducts).map(([groupName, groupItems]) => (
+                            <React.Fragment key={groupName}>
+                                <tr className="group-heading-row">
+                                    <td colSpan="6">{groupName}</td>
+                                </tr>
+                                <tr className="group-subheading-row">
+                                    <td colSpan="6">{product.vehicleType || product.vehicle_type || 'MOTOR CYCLES (4 Stroke)'}</td>
+                                </tr>
+                                {groupItems.map(item => {
+                                    const rate = getProductRate(item);
+                                    const mrp = getProductMrp(item);
+
+                                    return (
+                                        <tr key={item.id} className={isSameProduct(product, item) ? 'selected-sheet-row' : ''}>
+                                            <td>{serialNo++}</td>
+                                            <td>{getProductCode(item)}</td>
+                                            <td className="suitable-cell">{getProductName(item)}</td>
+                                            <td>{getProductUom(item)}</td>
+                                            <td>{rate ? rate.toFixed(2) : '-'}</td>
+                                            <td>{mrp ? mrp.toFixed(2) : '-'}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </React.Fragment>
+                        ))}
+                    </tbody>
+                </table>
+            </section>
         </div>
     );
 }

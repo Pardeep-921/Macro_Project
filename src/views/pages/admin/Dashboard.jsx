@@ -30,16 +30,6 @@ export default function AdminDashboard() {
             <PageHeader title="Admin Dashboard Section" />
 
             <section className="dashboard-shell">
-                <div className="dashboard-section-title">
-                    <div>
-                        <span className="dashboard-eyebrow">System Overview</span>
-                        <h2>Quick Stats</h2>
-                    </div>
-                    <span className={`dashboard-status ${loading ? 'is-loading' : ''}`}>
-                        {loading ? 'Updating' : 'Live'}
-                    </span>
-                </div>
-
                 <div className="dashboard-filter-panel">
                     <div>
                         <h3>Quick Filter by Customer</h3>

@@ -653,6 +653,8 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
       role,
       role_master: roleMaster,
       username: user.username,
+      fullname: user.fullname,
+      display_name: user.fullname || user.username,
       company_id_code: user.company_id_code || null,
       token,
     });

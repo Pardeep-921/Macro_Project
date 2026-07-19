@@ -55,6 +55,25 @@
     transform: translateY(-1px);
 }
 
+.catalog-admin-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 20px 36px 0;
+}
+
+.catalog-admin-actions .catalog-add-btn {
+    min-width: 128px;
+}
+
+.catalog-add-sub-btn {
+    background: #e37a22;
+}
+
+.catalog-add-sub-btn:hover {
+    background: #c96414;
+}
+
 .catalog-modal-overlay {
     position: fixed;
     inset: 0;
@@ -438,6 +457,10 @@
         margin: 18px 16px 0;
     }
 
+    .catalog-admin-actions {
+        padding: 18px 16px 0;
+    }
+
     .product-grid {
         grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
         gap: 14px;
@@ -447,6 +470,7 @@
 
 @media (max-width: 560px) {
     .catalog-toolbar,
+    .catalog-admin-actions,
     .catalog-modal-actions {
         align-items: stretch;
         flex-direction: column;
