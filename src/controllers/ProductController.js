@@ -60,8 +60,25 @@ export const useProductController = () => {
         setCart(prev => [...prev, ...newItems]);
     };
 
+    const addMultipleToCart = (itemsToAdd) => {
+        setCart(prev => [...prev, ...itemsToAdd]);
+    };
+
     const removeFromCart = (cartId) => {
         setCart(prev => prev.filter(item => item.cartId !== cartId));
+    };
+
+    const updateCartItemQuantity = (cartId, newQty) => {
+        setCart(prev => prev.map(item => {
+            if (item.cartId === cartId) {
+                return {
+                    ...item,
+                    qty: newQty,
+                    total: newQty * item.price
+                };
+            }
+            return item;
+        }));
     };
 
     const clearCart = () => {
@@ -75,7 +92,9 @@ export const useProductController = () => {
         loading,
         cart,
         addToCart,
+        addMultipleToCart,
         removeFromCart,
+        updateCartItemQuantity,
         clearCart
     };
 };

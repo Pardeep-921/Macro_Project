@@ -55,12 +55,25 @@ export default function Sidebar({ userType = 'admin', isOpen = false, onClose })
     const location = useLocation();
     const { logout, user } = useAuth();
     const [openSections, setOpenSections] = useState({});
+    const [cartBlinking, setCartBlinking] = useState(false);
     const welcomeLabel = user?.displayName || user?.companyName || user?.fullname || user?.username || (userType === 'admin' ? 'ADMIN' : 'USER');
 
     const isPathActive = useCallback(
         (path) => location.pathname === path || location.pathname.startsWith(`${path}/`),
         [location.pathname]
     );
+
+    useEffect(() => {
+        const handleCartUpdate = () => setCartBlinking(true);
+        window.addEventListener('cartUpdated', handleCartUpdate);
+        return () => window.removeEventListener('cartUpdated', handleCartUpdate);
+    }, []);
+
+    useEffect(() => {
+        if (isPathActive('/customer/add-item-cart')) {
+            setCartBlinking(false);
+        }
+    }, [isPathActive]);
 
     useEffect(() => {
         if (userType !== 'admin') return;
@@ -88,16 +101,21 @@ export default function Sidebar({ userType = 'admin', isOpen = false, onClose })
         setOpenSections((current) => ({ ...current, [sectionKey]: !isExpanded }));
     };
 
-    const renderNavLink = (item, className = 'nav-item') => (
-        <NavLink
-            key={item.path}
-            to={item.path}
-            onClick={handleNavItemClick}
-            className={({ isActive }) => `${className} ${isActive ? 'active' : ''}`}
-        >
-            {item.label}
-        </NavLink>
-    );
+    const renderNavLink = (item, className = 'nav-item') => {
+        const isCartBtn = item.path === '/customer/add-item-cart';
+        return (
+            <NavLink
+                key={item.path}
+                to={item.path}
+                onClick={handleNavItemClick}
+                className={({ isActive }) => `${className} ${isActive ? 'active' : ''}`}
+                style={{ display: 'flex', alignItems: 'center' }}
+            >
+                {isCartBtn && cartBlinking && <span className="cart-blink-dot"></span>}
+                {item.label}
+            </NavLink>
+        );
+    };
 
     return (
         <div className={`sidebar ${isOpen ? 'open' : ''}`}>

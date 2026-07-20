@@ -1,154 +1,180 @@
 .product-sheet-page {
-    min-height: 100%;
-    padding: 18px 24px 36px;
-    background: #f3f6f8;
+    padding: 20px;
+    background: #f8fafc;
+    min-height: 100vh;
 }
 
 .sheet-actions {
+    margin-bottom: 20px;
+}
+
+.sticky-header {
     display: flex;
-    justify-content: flex-start;
-    margin-bottom: 10px;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #f8fafc;
+    padding: 15px 0;
+    margin-top: -15px;
 }
 
 .back-btn {
-    border: 1px solid #9ca3af;
-    background: #ffffff;
-    color: #111827;
-    border-radius: 2px;
-    min-height: 32px;
-    padding: 6px 12px;
-    font-weight: 700;
+    padding: 8px 16px;
+    background: #e2e8f0;
+    color: #475569;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
+    font-weight: 500;
+}
+
+.add-to-cart-btn {
+    padding: 8px 16px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
 .back-btn:hover {
-    background: #f9fafb;
+    background: #cbd5e1;
 }
 
 .excel-sheet {
-    width: min(1180px, 100%);
-    margin: 0 auto;
-    background-color: #ffffff;
-    background-image:
-        linear-gradient(#e5e7eb 1px, transparent 1px),
-        linear-gradient(90deg, #e5e7eb 1px, transparent 1px);
-    background-size: 56px 18px;
-    border: 1px solid #000000;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
-    overflow-x: auto;
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .sheet-title {
-    min-width: 760px;
-    padding: 0 2px 14px;
-    border-bottom: 1px solid #000000;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 12px;
 }
 
 .sheet-title h1 {
+    font-size: 1.25rem;
+    color: #1e293b;
     margin: 0;
-    color: #000000;
-    font-family: "Times New Roman", Times, serif;
-    font-size: 17px;
-    font-weight: 800;
-    line-height: 1.18;
+    text-transform: uppercase;
 }
 
-.sheet-title p {
-    margin: 0;
-    color: #000000;
-    font-family: "Times New Roman", Times, serif;
-    font-size: 15px;
-    font-weight: 800;
-    line-height: 1.2;
+/* Accordion Styles */
+.accordion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
+.accordion-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.accordion-header {
+    background: #f1f5f9;
+    padding: 12px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    user-select: none;
+    font-weight: 600;
+    color: #0f172a;
+    transition: background 0.2s;
+}
+
+.accordion-header:hover {
+    background: #e2e8f0;
+}
+
+.accordion-icon {
+    font-family: monospace;
+    font-size: 1.2rem;
+    font-weight: bold;
+    width: 20px;
+    display: inline-block;
+    text-align: center;
+}
+
+.accordion-title {
+    text-transform: uppercase;
+}
+
+.accordion-content {
+    background: #fff;
+    border-top: 1px solid #e2e8f0;
+    padding: 16px;
+    overflow-x: auto;
+}
+
+/* Table Styles */
 .sub-product-table {
     width: 100%;
-    min-width: 760px;
     border-collapse: collapse;
-    table-layout: fixed;
-    color: #000000;
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 12px;
-    line-height: 1.1;
+    font-size: 0.85rem;
 }
 
 .sub-product-table th,
 .sub-product-table td {
-    border: 1px solid #000000;
-    padding: 1px 4px;
-    vertical-align: middle;
+    border: 1px solid #cbd5e1;
+    padding: 8px 12px;
+    text-align: left;
+    vertical-align: top;
 }
 
 .sub-product-table th {
-    height: 72px;
-    background: #ffffff;
-    text-align: center;
-    font-weight: 800;
-}
-
-.sub-product-table td {
-    height: 15px;
-    background: rgba(255, 255, 255, 0.78);
-    font-weight: 700;
-}
-
-.col-serial {
-    width: 44px;
-}
-
-.col-code {
-    width: 92px;
-}
-
-.col-uom {
-    width: 78px;
-}
-
-.col-price {
-    width: 86px;
-}
-
-.group-heading-row td {
-    height: 18px;
-    background: #ffffff;
-    font-family: "Times New Roman", Times, serif;
-    font-size: 16px;
-    font-weight: 900;
-    text-align: left;
-}
-
-.group-subheading-row td {
-    height: 16px;
-    background: #ffffff;
-    font-family: "Times New Roman", Times, serif;
-    font-size: 12px;
-    font-weight: 900;
-    text-align: left;
-}
-
-.suitable-cell {
-    text-align: left;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    background: #f8fafc;
+    font-weight: 600;
+    color: #334155;
     white-space: nowrap;
 }
 
-.sub-product-table td:not(.suitable-cell) {
+.col-serial { width: 60px; text-align: center !important; }
+.col-code { width: 100px; }
+.col-uom { width: 60px; text-align: center !important; }
+.col-price { width: 100px; text-align: right !important; }
+
+.col-qty { width: 80px; text-align: center !important; }
+
+.qty-cell {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.qty-input {
+    width: 60px;
+    padding: 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.qty-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+.sub-product-table td:nth-child(1),
+.sub-product-table td:nth-child(4) {
     text-align: center;
 }
 
 .sub-product-table td:nth-child(5),
-.sub-product-table td:nth-child(6) {
+.sub-product-table td:nth-child(6),
+.sub-product-table td:nth-child(7) {
     text-align: right;
+    font-variant-numeric: tabular-nums;
 }
 
-.selected-sheet-row td {
-    background: #eef6ff;
-}
-
-@media (max-width: 900px) {
-    .product-sheet-page {
-        padding: 14px 12px 28px;
-    }
+.suitable-cell {
+    color: #1e293b;
+    line-height: 1.4;
 }
