@@ -6,64 +6,69 @@ import './product-detail.css';
 
 const getProductName = (product) => product?.name || product?.item_name || 'Product';
 
-// Using exact items from the provided image as an example payload
-const DUMMY_COMPANIES = [
-    { 
-        id: 'hero', 
-        name: 'HERO HONDA',
-        items: [
-            { id: 1, macoNo: 'BSM051', suitableFor: 'Hero Honda CD-100. / Joy / Dawn / Street \nHero Honda Splendor / Passion \nSplendor plus / Passion Plus ( R )', pcs: 2, listPrice: 56.00, exciseDuty: 10.50, mrp: 120.00 },
-            { id: 2, macoNo: 'BSM-052', suitableFor: 'Hero Honda Ambition / CBZ (F & R)', pcs: 2, listPrice: 71.00, exciseDuty: 13.13, mrp: 150.00 },
-            { id: 3, macoNo: 'BSM-053', suitableFor: 'Hero Honda Splendor / Passion / Splebdor Plus / Passion Plus ( F ) / Honda Active / Dio / Eterno ( F&R) \nHero Honda Super Splendor / Achiever / Pleasure / Glamour / Glamour F1 ( F & R ) Hero Honda Karizma / CBZ Extreme ( R ) / Shine / Activa New', pcs: 2, listPrice: 71.00, exciseDuty: 13.13, mrp: 150.00 }
-        ]
-    },
+const SIZES = ['STD.', '0.001', '0.002', '0.003', '0.004', '0.005'];
+
+const CONNECTING_ROD_KITS = [
     {
         id: 'bajaj',
         name: 'BAJAJ AUTO',
         items: [
-            { id: 4, macoNo: 'BSM-054', suitableFor: 'Bajaj Legend / Discover ( F & R )', pcs: 2, listPrice: 71.00, exciseDuty: 13.13, mrp: 150.00 },
-            { id: 5, macoNo: 'BSM-055', suitableFor: 'Bajaj CT-100 ( F ) \nBajaj Caliber 115 / Pulsar / Kawasaki 100 ( R ) \nBajaj Caliber / Platina ( F & R ) \nBajaj KB 4S / Boxer AT / CT-100 ( R )', pcs: 2, listPrice: 60.00, exciseDuty: 11.38, mrp: 130.00 }
+            { id: 1, macoNo: 'BV-805', suitableFor: 'BAJAJ VESPA 150cc', listPrice: 324.00 },
+            { id: 2, macoNo: 'BB-815', suitableFor: 'BAJAJ XCD 125cc', listPrice: 375.00 },
+            { id: 12, macoNo: 'BD-879', suitableFor: 'BAJAJ DISCOVER 100 T', listPrice: 370.00 },
+            { id: 18, macoNo: 'BP-943', suitableFor: 'BAJAJ PULSAR 220 (BS6)', listPrice: 536.00 },
+            { id: 19, macoNo: 'BD-855', suitableFor: 'BAJAJ DISCOVER 100cc', listPrice: 370.00 },
+            { id: 20, macoNo: 'BC-849', suitableFor: 'BAJAJ CT-100/PLATINA', listPrice: 450.00 },
+            { id: 21, macoNo: 'BP-935', suitableFor: 'BAJAJ PULSAR 150 (BS6)', listPrice: 478.00 },
+            { id: 22, macoNo: 'BC-925', suitableFor: 'BAJAJ CT-110 (BS 6)', listPrice: 370.00 },
+            { id: 10, macoNo: 'BP-847', suitableFor: 'BP DIGITAL METER 150cc', listPrice: 478.00 },
+            { id: 24, macoNo: 'BP-847', suitableFor: 'BP DIGITAL METER 150cc (Duplicate)', listPrice: 478.00 }
+        ]
+    },
+    {
+        id: 'honda',
+        name: 'HONDA',
+        items: [
+            { id: 3, macoNo: 'HS-816', suitableFor: 'HONDA SHINE 125cc', listPrice: 428.00 },
+            { id: 7, macoNo: 'HA-875', suitableFor: 'HONDA ACTIVA HET 110', listPrice: 377.00 },
+            { id: 11, macoNo: 'HU-955', suitableFor: 'HONDA UNICORN 150cc', listPrice: 428.00 },
+            { id: 15, macoNo: 'HA-928', suitableFor: 'HONDA ACTIVA 110 6G (BS6)', listPrice: 377.00 },
+            { id: 16, macoNo: 'HA-845', suitableFor: 'HONDA ACTIVA 102cc', listPrice: 369.00 },
+            { id: 25, macoNo: 'HA-859', suitableFor: 'HONDA ACTIVA N/M 110cc', listPrice: 370.00 },
         ]
     },
     {
         id: 'tvs',
         name: 'TVS MOTORS',
         items: [
-            { id: 6, macoNo: 'BSM-056', suitableFor: 'TVS Suzuki / AX-100 /Star /Star Delux / Star City ( F & R ) \nTVS Suzuki Max / Victor/ Victor GL ( R )', pcs: 2, listPrice: 60.00, exciseDuty: 11.38, mrp: 130.00 },
-            { id: 7, macoNo: 'BSM-062', suitableFor: 'TVS Victor', pcs: 2, listPrice: 60.00, exciseDuty: 11.38, mrp: 130.00 },
-            { id: 8, macoNo: 'BSM-064', suitableFor: 'TVS Apache Rear', pcs: 2, listPrice: 71.00, exciseDuty: 13.13, mrp: 150.00 },
-            { id: 9, macoNo: 'BSM-066', suitableFor: 'TVS Super XL/HD', pcs: 2, listPrice: 40.00, exciseDuty: 7.53, mrp: 85.00 }
+            { id: 4, macoNo: 'TM-836', suitableFor: 'TVS SUPER XL/HD 70cc', listPrice: 205.00 },
+            { id: 8, macoNo: 'TM-885', suitableFor: 'TVS SUPER XL 4S', listPrice: 423.00 },
+            { id: 26, macoNo: 'TP-957', suitableFor: 'TVS SCOOTY PEP PLUS 90cc', listPrice: 370.00 },
         ]
     },
     {
-        id: 'yamaha',
-        name: 'YAMAHA',
+        id: 'hero',
+        name: 'HERO MOTOCORP',
         items: [
-            { id: 10, macoNo: 'BSM-057', suitableFor: 'Yamaha RX-100 / RX-135 / YBX / CRUX / \nRXG / Libero G5 / Libero / Crux-R / Crus -S / YD-125 ( F & R ) / Yamaha Enticer ( F )', pcs: 2, listPrice: 71.00, exciseDuty: 13.13, mrp: 150.00 },
-            { id: 11, macoNo: 'BSM-065', suitableFor: 'Yamaha FZ', pcs: 2, listPrice: 90.00, exciseDuty: 16.98, mrp: 190.00 }
-        ]
-    },
-    {
-        id: 'honda',
-        name: 'HONDA SCOOTERS',
-        items: [
-            { id: 12, macoNo: 'BSM-058', suitableFor: 'Honda Activa / Dio / Eterno ( F & R )', pcs: 2, listPrice: 71.00, exciseDuty: 13.13, mrp: 150.00 },
-            { id: 13, macoNo: 'BSM-060', suitableFor: 'Honda Activa New / Shine', pcs: 2, listPrice: 76.00, exciseDuty: 14.00, mrp: 160.00 }
+            { id: 5, macoNo: 'HH-956', suitableFor: 'HH SUPER SPLENDOR', listPrice: 373.00 },
+            { id: 6, macoNo: 'HH-800', suitableFor: 'HERO HONDA CD-100', listPrice: 359.00 },
+            { id: 13, macoNo: 'HH-921', suitableFor: 'HERO HF DLX (BS6)', listPrice: 370.00 },
+            { id: 14, macoNo: 'HH-913', suitableFor: 'HH SUPER SPLENDOR NEW', listPrice: 423.00 },
         ]
     },
     {
         id: 'suzuki',
         name: 'SUZUKI',
         items: [
-            { id: 14, macoNo: 'BSM-059', suitableFor: 'Suzuki Access', pcs: 2, listPrice: 71.00, exciseDuty: 13.13, mrp: 150.00 },
-            { id: 15, macoNo: 'BSM-061', suitableFor: 'Suzuki Samurai', pcs: 2, listPrice: 71.00, exciseDuty: 13.13, mrp: 150.00 }
+            { id: 9, macoNo: 'TA-899', suitableFor: 'SUZUKI ACCESS 125cc/NEW', listPrice: 395.00 },
+            { id: 17, macoNo: 'TA-856', suitableFor: 'SUZUKI ACCESS 125cc', listPrice: 447.00 },
         ]
     },
     {
-        id: 'kinetic',
-        name: 'KINETIC HONDA',
+        id: 'yamaha',
+        name: 'YAMAHA',
         items: [
-            { id: 16, macoNo: 'BSM-063', suitableFor: 'Kinetic Honda', pcs: 2, listPrice: 59.00, exciseDuty: 11.03, mrp: 125.00 }
+            { id: 23, macoNo: 'EY-936', suitableFor: 'YAMAHA RAY ZR 125 (BS 6)', listPrice: 375.00 },
         ]
     }
 ];
@@ -75,12 +80,37 @@ export default function ProductDetail() {
     const [product, setProduct] = useState(null);
     const [expandedCompanies, setExpandedCompanies] = useState({});
     const [quantities, setQuantities] = useState({});
+    const [selectedRows, setSelectedRows] = useState({});
 
-    const handleQuantityChange = (itemId, value) => {
+    const allItemIds = useMemo(() => {
+        return CONNECTING_ROD_KITS.flatMap(company => company.items.map(item => item.id));
+    }, []);
+
+    const allGlobalSelected = allItemIds.length > 0 && allItemIds.every(id => selectedRows[id]);
+
+    const handleGlobalSelectAll = (e) => {
+        const checked = e.target.checked;
+        const next = {};
+        if (checked) {
+            allItemIds.forEach(id => {
+                next[id] = true;
+            });
+        }
+        setSelectedRows(next);
+    };
+
+    const handleQuantityChange = (itemId, size, value) => {
+        const qtyKey = `${itemId}-${size}`;
         setQuantities(prev => ({
             ...prev,
-            [itemId]: Math.max(0, parseInt(value) || 0)
+            [qtyKey]: Math.max(0, parseInt(value) || 0)
         }));
+    };
+
+    const getRowTotalQty = (itemId) => {
+        return SIZES.reduce((total, size) => {
+            return total + (quantities[`${itemId}-${size}`] || 0);
+        }, 0);
     };
 
     const marketplaceProducts = useMemo(() => (
@@ -101,24 +131,28 @@ export default function ProductDetail() {
 
     const handleAddToCart = () => {
         const itemsToAdd = [];
-        DUMMY_COMPANIES.forEach(company => {
+        CONNECTING_ROD_KITS.forEach(company => {
             company.items.forEach(item => {
-                const qty = quantities[item.id] || 0;
-                if (qty > 0) {
-                    itemsToAdd.push({
-                        id: product.id,
-                        item_id: item.macoNo,
-                        name: item.suitableFor,
-                        category: product.category || 'Spare Part',
-                        size: item.macoNo,
-                        size_id: item.id,
-                        qty: qty,
-                        price: item.listPrice, // Using list price as price
-                        uom: 'PCS',
-                        total: qty * item.listPrice,
-                        cartId: `${item.id}-${Date.now()}`
-                    });
-                }
+                if (!selectedRows[item.id]) return; // Skip if row is not selected
+
+                SIZES.forEach(size => {
+                    const qty = quantities[`${item.id}-${size}`] || 0;
+                    if (qty > 0) {
+                        itemsToAdd.push({
+                            id: product?.id || 'prod-1',
+                            item_id: item.macoNo,
+                            name: `${item.suitableFor} (${size})`,
+                            category: product?.category || 'Connecting Rod Kits',
+                            size: size,
+                            size_id: `${item.id}-${size}`,
+                            qty: qty,
+                            price: item.listPrice,
+                            uom: 'PCS',
+                            total: qty * item.listPrice,
+                            cartId: `${item.id}-${size}-${Date.now()}`
+                        });
+                    }
+                });
             });
         });
 
@@ -126,33 +160,38 @@ export default function ProductDetail() {
             addMultipleToCart(itemsToAdd);
             window.dispatchEvent(new Event('cartUpdated'));
             alert(`Added ${itemsToAdd.length} items to cart!`);
-            // Reset quantities after adding
             setQuantities({});
+            setSelectedRows({});
         } else {
-            alert('Please select at least one item quantity to add to cart.');
+            alert('Please enter a quantity greater than 0 for the selected items.');
         }
     };
 
     if (loading && !product) return <div className="text-center mt-20">Loading Product Details...</div>;
-    if (!product && !loading) return <div className="text-center mt-20">Product not found.</div>;
+    // if (!product && !loading) return <div className="text-center mt-20">Product not found.</div>;
 
     let globalSerialNo = 1;
 
-    const hasSelectedItems = Object.values(quantities).some(q => q > 0);
+    const hasValidSelection = Object.entries(selectedRows).some(([id, isSelected]) => {
+        if (!isSelected) return false;
+        return SIZES.some(size => (quantities[`${id}-${size}`] || 0) > 0);
+    });
 
     return (
         <div className="product-sheet-page">
-            <div className="sheet-actions sticky-header">
-                <button className="back-btn" onClick={() => navigate(-1)}>
-                    Back to Catalog
-                </button>
-                <button 
-                    className="add-to-cart-btn" 
+            <div className="sheet-actions sticky-header" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                    <button className="back-btn" onClick={() => navigate(-1)}>
+                        Back to Catalog
+                    </button>
+                </div>
+                <button
+                    className="add-to-cart-btn"
                     onClick={handleAddToCart}
-                    disabled={!hasSelectedItems}
+                    disabled={!hasValidSelection}
                     style={{
-                        background: hasSelectedItems ? '#3b82f6' : '#cbd5e1',
-                        cursor: hasSelectedItems ? 'pointer' : 'not-allowed'
+                        background: hasValidSelection ? '#3b82f6' : '#cbd5e1',
+                        cursor: hasValidSelection ? 'pointer' : 'not-allowed'
                     }}
                 >
                     Add to Cart All Selected Items
@@ -165,55 +204,97 @@ export default function ProductDetail() {
                 </div>
 
                 <div className="accordion-list">
-                    {DUMMY_COMPANIES.map((company) => {
+                    {CONNECTING_ROD_KITS.map((company) => {
                         const isExpanded = expandedCompanies[company.id];
                         return (
                             <div key={company.id} className="accordion-item">
-                                <div 
-                                    className="accordion-header" 
+                                <div
+                                    className="accordion-header"
                                     onClick={() => toggleCompany(company.id)}
                                 >
                                     <span className="accordion-icon">{isExpanded ? '-' : '+'}</span>
                                     <span className="accordion-title">{company.name}</span>
                                 </div>
-                                
+
                                 {isExpanded && (
-                                    <div className="accordion-content">
-                                        <table className="sub-product-table">
+                                    <div className="accordion-content" style={{ overflowX: 'auto' }}>
+                                        <table className="sub-product-table" style={{ minWidth: '900px' }}>
                                             <thead>
                                                 <tr>
-                                                    <th className="col-serial">S. NO.</th>
-                                                    <th className="col-code">Maco No.</th>
-                                                    <th>Suitable For</th>
-                                                    <th className="col-uom">PCS<br />Per<br />Set</th>
-                                                    <th className="col-price">List<br />Price</th>
-                                                    <th className="col-price">Excise Duty<br />12.50% ON<br />Rs. M.R.P. Less 30%<br />ABATEMENT</th>
-                                                    <th className="col-price">M.R.P. Inclusive<br />All Taxes Rs.</th>
-                                                    <th className="col-qty">Quantity</th>
+                                                    <th className="col-serial" rowSpan={2} style={{ verticalAlign: 'middle', minWidth: '80px' }}>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center' }}>
+                                                            <div style={{ fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '14px' }}>SELECT</div>
+                                                            <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'normal', margin: 0, padding: 0 }}>
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={allGlobalSelected}
+                                                                    onChange={handleGlobalSelectAll}
+                                                                    style={{ width: '14px', height: '14px', cursor: 'pointer', margin: 0 }}
+                                                                    title="Select all items across all groups"
+                                                                />
+                                                                ALL
+                                                            </label>
+                                                        </div>
+                                                    </th>
+                                                    <th className="col-code" rowSpan={2}>MACO PART NO.</th>
+                                                    <th rowSpan={2}>ITEM DESCRIPTION</th>
+                                                    <th colSpan={6} style={{ textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>SIZE</th>
+                                                    <th className="col-qty" rowSpan={2}>TOTAL QTY.</th>
+                                                    <th className="col-price" rowSpan={2}>LIST PRICE</th>
+                                                    <th className="col-price" rowSpan={2}>TOTAL LIST VALUE</th>
+                                                </tr>
+                                                <tr>
+                                                    {SIZES.map(size => (
+                                                        <th key={size} style={{ fontSize: '0.85rem', width: '60px' }}>{size}</th>
+                                                    ))}
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {company.items.map(item => (
-                                                    <tr key={item.id}>
-                                                        <td>{globalSerialNo++}</td>
-                                                        <td>{item.macoNo}</td>
-                                                        <td className="suitable-cell" style={{ whiteSpace: 'pre-line' }}>{item.suitableFor}</td>
-                                                        <td>{item.pcs}</td>
-                                                        <td>{item.listPrice.toFixed(2)}</td>
-                                                        <td>{item.exciseDuty.toFixed(2)}</td>
-                                                        <td>{item.mrp.toFixed(2)}</td>
-                                                        <td className="qty-cell">
-                                                            <input 
-                                                                type="number" 
-                                                                min="0"
-                                                                value={quantities[item.id] || ''}
-                                                                onChange={(e) => handleQuantityChange(item.id, e.target.value)}
-                                                                className="qty-input"
-                                                                placeholder="0"
-                                                            />
-                                                        </td>
-                                                    </tr>
-                                                ))}
+                                                {company.items.map(item => {
+                                                    const rowQty = getRowTotalQty(item.id);
+                                                    const rowValue = rowQty * item.listPrice;
+
+                                                    return (
+                                                        <tr key={item.id} style={{ backgroundColor: selectedRows[item.id] ? '#f0f9ff' : 'transparent' }}>
+                                                            <td style={{ verticalAlign: 'middle' }}>
+                                                                <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={!!selectedRows[item.id]}
+                                                                        onChange={(e) => {
+                                                                            const checked = e.target.checked;
+                                                                            setSelectedRows(prev => ({
+                                                                                ...prev,
+                                                                                [item.id]: checked
+                                                                            }));
+                                                                        }}
+                                                                        style={{ width: '16px', height: '16px', cursor: 'pointer', margin: 0 }}
+                                                                    />
+                                                                </div>
+                                                            </td>
+                                                            <td style={{ fontWeight: 'bold', verticalAlign: 'middle' }}>{item.macoNo}</td>
+                                                            <td className="suitable-cell">{item.suitableFor}</td>
+
+                                                            {SIZES.map(size => (
+                                                                <td key={size} className="qty-cell" style={{ padding: '4px' }}>
+                                                                    <input
+                                                                        type="number"
+                                                                        min="0"
+                                                                        value={quantities[`${item.id}-${size}`] || ''}
+                                                                        onChange={(e) => handleQuantityChange(item.id, size, e.target.value)}
+                                                                        className="qty-input"
+                                                                        placeholder="-"
+                                                                        style={{ width: '100%', padding: '4px', textAlign: 'center', margin: 0 }}
+                                                                    />
+                                                                </td>
+                                                            ))}
+
+                                                            <td style={{ fontWeight: 'bold', textAlign: 'center' }}>{rowQty > 0 ? rowQty : '-'}</td>
+                                                            <td style={{ textAlign: 'right' }}>{item.listPrice.toFixed(2)}</td>
+                                                            <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{rowValue > 0 ? rowValue.toFixed(2) : '-'}</td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>
@@ -226,3 +307,4 @@ export default function ProductDetail() {
         </div>
     );
 }
+

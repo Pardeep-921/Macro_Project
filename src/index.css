@@ -545,7 +545,7 @@ a:hover {
   top: 0;
   left: 0;
   height: 100vh;
-  overflow-y: auto;
+  overflow-y: hidden;
   display: flex;
   flex-direction: column;
   z-index: 100;
@@ -558,6 +558,7 @@ a:hover {
   text-align: center;
   background-color: #1a1a1a;
   border-bottom: 1px solid #444;
+  flex-shrink: 0;
 }
 
 .sidebar-logo img {
@@ -587,6 +588,7 @@ a:hover {
   font-size: 12px;
   border-bottom: 1px solid #444;
   line-height: 1.7;
+  flex-shrink: 0;
 }
 
 .sidebar-welcome .admin-label {
@@ -605,6 +607,8 @@ a:hover {
   flex-direction: column;
   gap: 4px;
   padding: 10px 8px 16px;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .sidebar-nav .nav-item {

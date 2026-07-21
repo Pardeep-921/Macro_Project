@@ -34,9 +34,9 @@ export default function Product({ product, onViewDetails }) {
             
             <div className="product-card-content">
                 <h3 className="product-title">{product.name}</h3>
-                {(product.description || product.specifications) && (
+                {(product.description || product.specifications || product.desc) && (
                     <p className="product-card-description">
-                        {product.description || product.specifications}
+                        {product.description || product.specifications || product.desc}
                     </p>
                 )}
                 {(product.supplierName || product.supplier_name || product.location) && (

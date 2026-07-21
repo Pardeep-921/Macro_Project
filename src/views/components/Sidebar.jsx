@@ -21,7 +21,7 @@ const adminNavSections = [
         label: 'Master Data',
         items: [
             { path: '/admin/manage-primary-item', label: 'Manage Primary Group Master' },
-            { path: '/admin/manage-sub-item', label: 'Manage Sub Group Item Master' },
+            { path: '/admin/manage-sub-item', label: 'Manage Sub Group' },
             { path: '/admin/manage-item-master', label: 'Manage Item Master' },
             { path: '/admin/manage-item-unit', label: 'Manage Item Unit' },
             { path: '/admin/manage-item-size', label: 'Manage Item Size' },

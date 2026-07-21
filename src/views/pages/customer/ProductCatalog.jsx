@@ -4,6 +4,7 @@ import Product from '../../components/Product';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
 import { useProductController } from '../../../controllers/ProductController';
+import { useMasterDataController } from '../../../controllers/MasterDataController';
 import { staticProducts } from '../../../data/marketplaceProducts';
 import './product-catalog.css';
 
@@ -23,11 +24,19 @@ const isHiddenLegacyMarketplaceItem = (product) => (
 );
 
 export default function ProductCatalog() {
-    const { products: apiProducts, loading } = useProductController();
+    const { products: apiProducts, loading: loadingProducts } = useProductController();
+    const { data: primaryGroups, loading: loadingGroups } = useMasterDataController('PrimaryGroups');
     const { user } = useAuth();
     const navigate = useNavigate();
     const isAdmin = user?.role === 'admin';
-    const products = [...apiProducts, ...staticProducts].filter(product => !isHiddenLegacyMarketplaceItem(product));
+
+    const loading = loadingProducts || loadingGroups;
+
+    // Deduplicate static products against edited primary groups
+    const groupIds = new Set(primaryGroups.map(p => String(p.id)));
+    const mergedStatic = staticProducts.filter(p => !groupIds.has(String(p.id)));
+
+    const products = [...primaryGroups, ...apiProducts, ...mergedStatic].filter(product => !isHiddenLegacyMarketplaceItem(product));
 
     const handleViewDetails = (product) => {
         const pathPrefix = window.location.pathname.startsWith('/admin') ? '/admin' : '/customer';
@@ -40,24 +49,24 @@ export default function ProductCatalog() {
 
             {isAdmin && (
                 <div className="catalog-admin-actions" aria-label="Admin catalog actions">
-                    <button type="button" className="catalog-add-btn" onClick={() => navigate('/admin/manage-item-master')}>
+                    <button type="button" className="catalog-add-btn" onClick={() => navigate('/admin/manage-primary-item', { state: { openAddModal: true } })}>
                         Add Item
                     </button>
-                    <button type="button" className="catalog-add-btn catalog-add-sub-btn" onClick={() => navigate('/admin/manage-sub-item')}>
-                        Add Sub Item
+                    <button type="button" className="catalog-add-btn catalog-add-sub-btn" onClick={() => navigate('/admin/manage-primary-item')}>
+                        Edit Item
                     </button>
                 </div>
             )}
-            
+
             <div className="product-grid">
                 {loading && (
                     <div className="no-products-msg">Loading catalog...</div>
                 )}
                 {products.map((product, index) => (
-                    <Product 
-                        key={`${product.item_code || product.id}-${index}`} 
-                        product={product} 
-                        onViewDetails={handleViewDetails} 
+                    <Product
+                        key={`${product.item_code || product.id}-${index}`}
+                        product={product}
+                        onViewDetails={handleViewDetails}
                     />
                 ))}
                 {products.length === 0 && (
