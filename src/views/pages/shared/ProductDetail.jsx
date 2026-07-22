@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useProductController } from '../../../controllers/ProductController';
+import { useMasterDataController } from '../../../controllers/MasterDataController';
 import { getSavedMarketplaceItems, staticProducts } from '../../../data/marketplaceProducts';
 import './product-detail.css';
 
@@ -82,11 +83,42 @@ export default function ProductDetail() {
     const [quantities, setQuantities] = useState({});
     const [selectedRows, setSelectedRows] = useState({});
 
-    const allItemIds = useMemo(() => {
-        return CONNECTING_ROD_KITS.flatMap(company => company.items.map(item => item.id));
-    }, []);
+    const { data: subGroups, loading: subGroupsLoading } = useMasterDataController('SubGroups');
+    const { data: masterItems, loading: itemsLoading } = useMasterDataController('Products');
 
-    const allGlobalSelected = allItemIds.length > 0 && allItemIds.every(id => selectedRows[id]);
+    const displayGroups = useMemo(() => {
+        let baseGroups = (String(id) === '101' || String(id) === 'prod-1' || product?.name?.toLowerCase().includes('clutch'))
+            ? JSON.parse(JSON.stringify(CONNECTING_ROD_KITS))
+            : [];
+
+        const relatedSubGroups = subGroups.filter(sg => String(sg.primary_group_id) === String(id));
+
+        relatedSubGroups.forEach(sg => {
+            const items = masterItems.filter(item => String(item.sub_group_id) === String(sg.id)).map(item => ({
+                id: item.id,
+                macoNo: item.itemCode || item.item_code || '',
+                suitableFor: item.name || item.item_name || '',
+                listPrice: parseFloat(item.rate || item.list_price || 0)
+            }));
+
+            const existingIndex = baseGroups.findIndex(bg => bg.name.toLowerCase() === sg.name.toLowerCase());
+            if (existingIndex >= 0) {
+                baseGroups[existingIndex].id = sg.id;
+                const newItems = items.filter(newIt => !baseGroups[existingIndex].items.find(oldIt => oldIt.macoNo === newIt.macoNo));
+                baseGroups[existingIndex].items = [...baseGroups[existingIndex].items, ...newItems];
+            } else {
+                baseGroups.push({ id: sg.id, name: sg.name, items: items });
+            }
+        });
+
+        return baseGroups;
+    }, [id, subGroups, masterItems, product]);
+
+    const allItemIds = useMemo(() => {
+        return displayGroups.flatMap(company => company.items.map(item => item.id));
+    }, [displayGroups]);
+
+    const allGlobalSelected = allItemIds.length > 0 && allItemIds.every(itemId => selectedRows[itemId]);
 
     const handleGlobalSelectAll = (e) => {
         const checked = e.target.checked;
@@ -131,7 +163,7 @@ export default function ProductDetail() {
 
     const handleAddToCart = () => {
         const itemsToAdd = [];
-        CONNECTING_ROD_KITS.forEach(company => {
+        displayGroups.forEach(company => {
             company.items.forEach(item => {
                 if (!selectedRows[item.id]) return; // Skip if row is not selected
 
@@ -204,7 +236,7 @@ export default function ProductDetail() {
                 </div>
 
                 <div className="accordion-list">
-                    {CONNECTING_ROD_KITS.map((company) => {
+                    {displayGroups.map((company) => {
                         const isExpanded = expandedCompanies[company.id];
                         return (
                             <div key={company.id} className="accordion-item">

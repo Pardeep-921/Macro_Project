@@ -1,4 +1,6 @@
-const STORAGE_KEY = 'maco_demo_db_v1';
+import { staticProducts } from './marketplaceProducts';
+
+const STORAGE_KEY = 'maco_demo_db_v3';
 
 const today = new Date().toISOString().split('T')[0];
 
@@ -118,7 +120,15 @@ const seedData = {
     ],
     subGroups: [
         { id: 1, name: 'Cotton Fabric', sub_group_name: 'Cotton Fabric', primary_group_id: 1, primaryGroupName: 'Textile Raw Material' },
-        { id: 2, name: 'Corrugated Sheets', sub_group_name: 'Corrugated Sheets', primary_group_id: 2, primaryGroupName: 'Packaging' }
+        { id: 2, name: 'Corrugated Sheets', sub_group_name: 'Corrugated Sheets', primary_group_id: 2, primaryGroupName: 'Packaging' },
+        ...staticProducts.flatMap((prod) => [
+            { id: `${prod.id}-bajaj`, name: 'BAJAJ AUTO', sub_group_name: 'BAJAJ AUTO', primary_group_id: prod.id, primaryGroupName: prod.name },
+            { id: `${prod.id}-honda`, name: 'HONDA', sub_group_name: 'HONDA', primary_group_id: prod.id, primaryGroupName: prod.name },
+            { id: `${prod.id}-tvs`, name: 'TVS MOTORS', sub_group_name: 'TVS MOTORS', primary_group_id: prod.id, primaryGroupName: prod.name },
+            { id: `${prod.id}-hero`, name: 'HERO MOTOCORP', sub_group_name: 'HERO MOTOCORP', primary_group_id: prod.id, primaryGroupName: prod.name },
+            { id: `${prod.id}-suzuki`, name: 'SUZUKI', sub_group_name: 'SUZUKI', primary_group_id: prod.id, primaryGroupName: prod.name },
+            { id: `${prod.id}-yamaha`, name: 'YAMAHA', sub_group_name: 'YAMAHA', primary_group_id: prod.id, primaryGroupName: prod.name }
+        ])
     ],
     shippingCarriers: [
         { id: 1, name: 'BlueDart Surface', method_name: 'BlueDart Surface' },
@@ -339,7 +349,10 @@ function saveDb(db) {
 }
 
 function nextId(rows) {
-    return Math.max(0, ...rows.map(row => Number(row.id) || 0)) + 1;
+    const maxId = Math.max(0, ...rows.map(row => Number(row.id) || 0));
+    // If maxId is very small (e.g. they deleted all default items), jump to a high timestamp-based ID
+    // to prevent ID reuse which causes new items to accidentally inherit orphaned sub-groups.
+    return maxId < 1000 ? Date.now() + Math.floor(Math.random() * 1000) : maxId + 1;
 }
 
 function getNextCustomerIdFromDb(db) {

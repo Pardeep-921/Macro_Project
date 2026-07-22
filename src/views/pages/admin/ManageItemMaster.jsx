@@ -309,32 +309,7 @@ export default function ManageItemMaster() {
 
                     </div>
 
-                    <aside className="master-side-panel">
-                        <span className="master-panel-kicker">Overview</span>
-                        <h3>Quick Summary</h3>
-                        <div className="master-stat-list">
-                            <div className="master-stat-item">
-                                <span>Total Records</span>
-                                <strong>{pLoading ? '...' : products.length}</strong>
-                            </div>
-                            <div className="master-stat-item">
-                                <span>Primary Groups</span>
-                                <strong>{primaryGroups.length}</strong>
-                            </div>
-                            <div className="master-stat-item">
-                                <span>Sub Groups</span>
-                                <strong>{subGroups.length}</strong>
-                            </div>
-                            <div className="master-stat-item">
-                                <span>Sizes</span>
-                                <strong>{sizes.length}</strong>
-                            </div>
-                            <div className="master-stat-item">
-                                <span>Units</span>
-                                <strong>{units.length}</strong>
-                            </div>
-                        </div>
-                    </aside>
+
                 </section>
 
                 <section className="master-table-panel">

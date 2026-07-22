@@ -19,7 +19,8 @@ export default function MasterDataPage({
     loading = false,
     actions,
     onAction,
-    stats = []
+    stats = [],
+    customTable
 }) {
     const recordsLabel = data.length === 1 ? 'Record' : 'Records';
 
@@ -28,18 +29,6 @@ export default function MasterDataPage({
             <PageHeader title={title} />
 
             <div className="master-shell">
-                <section className="master-hero">
-                    <div>
-                        <span className="master-eyebrow">{eyebrow}</span>
-                        <h2>{title}</h2>
-                        {description && <p>{description}</p>}
-                    </div>
-                    <div className="master-record-pill">
-                        <strong>{loading ? '...' : data.length}</strong>
-                        <span>{recordsLabel}</span>
-                    </div>
-                </section>
-
                 <section className="master-workspace">
                     <div className="master-form-panel">
                         <div className="master-panel-heading">
@@ -67,22 +56,7 @@ export default function MasterDataPage({
                         </form>
                     </div>
 
-                    <aside className="master-side-panel">
-                        <span className="master-panel-kicker">Overview</span>
-                        <h3>Quick Summary</h3>
-                        <div className="master-stat-list">
-                            <div className="master-stat-item">
-                                <span>Total Records</span>
-                                <strong>{loading ? '...' : data.length}</strong>
-                            </div>
-                            {stats.map((stat) => (
-                                <div className="master-stat-item" key={stat.label}>
-                                    <span>{stat.label}</span>
-                                    <strong>{stat.value}</strong>
-                                </div>
-                            ))}
-                        </div>
-                    </aside>
+
                 </section>
 
                 <section className="master-table-panel">
@@ -96,6 +70,8 @@ export default function MasterDataPage({
 
                     {loading ? (
                         <div className="master-loading">Loading records...</div>
+                    ) : customTable ? (
+                        customTable
                     ) : (
                         <DataTable
                             columns={columns}
