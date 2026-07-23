@@ -1487,6 +1487,7 @@ fieldset legend {
 
 .item-master-page .master-workspace {
   align-items: start;
+  grid-template-columns: 1fr;
 }
 
 .item-master-page .master-side-panel {
@@ -3533,3 +3534,8 @@ img {
     .info-grid { grid-template-columns: 1fr; }
 }
 
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}

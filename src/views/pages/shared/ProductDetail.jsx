@@ -7,72 +7,9 @@ import './product-detail.css';
 
 const getProductName = (product) => product?.name || product?.item_name || 'Product';
 
-const SIZES = ['STD.', '0.001', '0.002', '0.003', '0.004', '0.005'];
 
-const CONNECTING_ROD_KITS = [
-    {
-        id: 'bajaj',
-        name: 'BAJAJ AUTO',
-        items: [
-            { id: 1, macoNo: 'BV-805', suitableFor: 'BAJAJ VESPA 150cc', listPrice: 324.00 },
-            { id: 2, macoNo: 'BB-815', suitableFor: 'BAJAJ XCD 125cc', listPrice: 375.00 },
-            { id: 12, macoNo: 'BD-879', suitableFor: 'BAJAJ DISCOVER 100 T', listPrice: 370.00 },
-            { id: 18, macoNo: 'BP-943', suitableFor: 'BAJAJ PULSAR 220 (BS6)', listPrice: 536.00 },
-            { id: 19, macoNo: 'BD-855', suitableFor: 'BAJAJ DISCOVER 100cc', listPrice: 370.00 },
-            { id: 20, macoNo: 'BC-849', suitableFor: 'BAJAJ CT-100/PLATINA', listPrice: 450.00 },
-            { id: 21, macoNo: 'BP-935', suitableFor: 'BAJAJ PULSAR 150 (BS6)', listPrice: 478.00 },
-            { id: 22, macoNo: 'BC-925', suitableFor: 'BAJAJ CT-110 (BS 6)', listPrice: 370.00 },
-            { id: 10, macoNo: 'BP-847', suitableFor: 'BP DIGITAL METER 150cc', listPrice: 478.00 },
-            { id: 24, macoNo: 'BP-847', suitableFor: 'BP DIGITAL METER 150cc (Duplicate)', listPrice: 478.00 }
-        ]
-    },
-    {
-        id: 'honda',
-        name: 'HONDA',
-        items: [
-            { id: 3, macoNo: 'HS-816', suitableFor: 'HONDA SHINE 125cc', listPrice: 428.00 },
-            { id: 7, macoNo: 'HA-875', suitableFor: 'HONDA ACTIVA HET 110', listPrice: 377.00 },
-            { id: 11, macoNo: 'HU-955', suitableFor: 'HONDA UNICORN 150cc', listPrice: 428.00 },
-            { id: 15, macoNo: 'HA-928', suitableFor: 'HONDA ACTIVA 110 6G (BS6)', listPrice: 377.00 },
-            { id: 16, macoNo: 'HA-845', suitableFor: 'HONDA ACTIVA 102cc', listPrice: 369.00 },
-            { id: 25, macoNo: 'HA-859', suitableFor: 'HONDA ACTIVA N/M 110cc', listPrice: 370.00 },
-        ]
-    },
-    {
-        id: 'tvs',
-        name: 'TVS MOTORS',
-        items: [
-            { id: 4, macoNo: 'TM-836', suitableFor: 'TVS SUPER XL/HD 70cc', listPrice: 205.00 },
-            { id: 8, macoNo: 'TM-885', suitableFor: 'TVS SUPER XL 4S', listPrice: 423.00 },
-            { id: 26, macoNo: 'TP-957', suitableFor: 'TVS SCOOTY PEP PLUS 90cc', listPrice: 370.00 },
-        ]
-    },
-    {
-        id: 'hero',
-        name: 'HERO MOTOCORP',
-        items: [
-            { id: 5, macoNo: 'HH-956', suitableFor: 'HH SUPER SPLENDOR', listPrice: 373.00 },
-            { id: 6, macoNo: 'HH-800', suitableFor: 'HERO HONDA CD-100', listPrice: 359.00 },
-            { id: 13, macoNo: 'HH-921', suitableFor: 'HERO HF DLX (BS6)', listPrice: 370.00 },
-            { id: 14, macoNo: 'HH-913', suitableFor: 'HH SUPER SPLENDOR NEW', listPrice: 423.00 },
-        ]
-    },
-    {
-        id: 'suzuki',
-        name: 'SUZUKI',
-        items: [
-            { id: 9, macoNo: 'TA-899', suitableFor: 'SUZUKI ACCESS 125cc/NEW', listPrice: 395.00 },
-            { id: 17, macoNo: 'TA-856', suitableFor: 'SUZUKI ACCESS 125cc', listPrice: 447.00 },
-        ]
-    },
-    {
-        id: 'yamaha',
-        name: 'YAMAHA',
-        items: [
-            { id: 23, macoNo: 'EY-936', suitableFor: 'YAMAHA RAY ZR 125 (BS 6)', listPrice: 375.00 },
-        ]
-    }
-];
+
+
 
 export default function ProductDetail() {
     const { id } = useParams();
@@ -85,19 +22,43 @@ export default function ProductDetail() {
 
     const { data: subGroups, loading: subGroupsLoading } = useMasterDataController('SubGroups');
     const { data: masterItems, loading: itemsLoading } = useMasterDataController('Products');
+    const { data: schema } = useMasterDataController('ItemMasterSchema');
+
+    const getCompanySchemaAndSizes = (companyId) => {
+        let compSchema = schema.filter(s => String(s.sub_group_id) === String(companyId));
+        if (compSchema.length === 0) compSchema = schema.filter(s => !s.sub_group_id);
+        
+        const sorted = [...compSchema].sort((a, b) => a.order - b.order);
+        
+        const priceIndex = sorted.findIndex(f => f.key === 'list_price');
+        const insertIdx = priceIndex >= 0 ? priceIndex : sorted.length;
+        
+        if (!sorted.some(f => f.key === 'total_qty')) {
+            sorted.splice(insertIdx, 0, { id: 'v-qty', key: 'total_qty', label: 'TOTAL QTY.', type: 'number' });
+        }
+        if (!sorted.some(f => f.key === 'total_list_value')) {
+            sorted.push({ id: 'v-val', key: 'total_list_value', label: 'TOTAL LIST VALUE', type: 'number' });
+        }
+
+        const sizeField = sorted.find(f => f.key === 'size');
+        const sizes = sizeField?.options 
+            ? sizeField.options.split(',').map(s => s.trim()).filter(Boolean)
+            : ['STD.', '0.001', '0.002', '0.003', '0.004', '0.005'];
+
+        return { schema: sorted, sizes };
+    };
 
     const displayGroups = useMemo(() => {
-        let baseGroups = (String(id) === '101' || String(id) === 'prod-1' || product?.name?.toLowerCase().includes('clutch'))
-            ? JSON.parse(JSON.stringify(CONNECTING_ROD_KITS))
-            : [];
+        let baseGroups = [];
 
         const relatedSubGroups = subGroups.filter(sg => String(sg.primary_group_id) === String(id));
 
         relatedSubGroups.forEach(sg => {
             const items = masterItems.filter(item => String(item.sub_group_id) === String(sg.id)).map(item => ({
+                ...item,
                 id: item.id,
-                macoNo: item.itemCode || item.item_code || '',
-                suitableFor: item.name || item.item_name || '',
+                macoNo: item.itemCode || item.item_code || item.maco_part_no || '',
+                suitableFor: item.name || item.item_name || item.item_description || '',
                 listPrice: parseFloat(item.rate || item.list_price || 0)
             }));
 
@@ -110,6 +71,8 @@ export default function ProductDetail() {
                 baseGroups.push({ id: sg.id, name: sg.name, items: items });
             }
         });
+
+        return baseGroups;
 
         return baseGroups;
     }, [id, subGroups, masterItems, product]);
@@ -139,8 +102,8 @@ export default function ProductDetail() {
         }));
     };
 
-    const getRowTotalQty = (itemId) => {
-        return SIZES.reduce((total, size) => {
+    const getRowTotalQty = (itemId, compSizes) => {
+        return compSizes.reduce((total, size) => {
             return total + (quantities[`${itemId}-${size}`] || 0);
         }, 0);
     };
@@ -164,10 +127,12 @@ export default function ProductDetail() {
     const handleAddToCart = () => {
         const itemsToAdd = [];
         displayGroups.forEach(company => {
+            const { sizes: compSizes } = getCompanySchemaAndSizes(company.id);
+            
             company.items.forEach(item => {
                 if (!selectedRows[item.id]) return; // Skip if row is not selected
 
-                SIZES.forEach(size => {
+                compSizes.forEach(size => {
                     const qty = quantities[`${item.id}-${size}`] || 0;
                     if (qty > 0) {
                         itemsToAdd.push({
@@ -204,9 +169,12 @@ export default function ProductDetail() {
 
     let globalSerialNo = 1;
 
-    const hasValidSelection = Object.entries(selectedRows).some(([id, isSelected]) => {
-        if (!isSelected) return false;
-        return SIZES.some(size => (quantities[`${id}-${size}`] || 0) > 0);
+    const hasValidSelection = displayGroups.some(company => {
+        const { sizes: compSizes } = getCompanySchemaAndSizes(company.id);
+        return company.items.some(item => {
+            if (!selectedRows[item.id]) return false;
+            return compSizes.some(size => (quantities[`${item.id}-${size}`] || 0) > 0);
+        });
     });
 
     return (
@@ -238,6 +206,8 @@ export default function ProductDetail() {
                 <div className="accordion-list">
                     {displayGroups.map((company) => {
                         const isExpanded = expandedCompanies[company.id];
+                        const { schema: activeSchema, sizes: compSizes } = getCompanySchemaAndSizes(company.id);
+                        
                         return (
                             <div key={company.id} className="accordion-item">
                                 <div
@@ -268,22 +238,24 @@ export default function ProductDetail() {
                                                             </label>
                                                         </div>
                                                     </th>
-                                                    <th className="col-code" rowSpan={2}>MACO PART NO.</th>
-                                                    <th rowSpan={2}>ITEM DESCRIPTION</th>
-                                                    <th colSpan={6} style={{ textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>SIZE</th>
-                                                    <th className="col-qty" rowSpan={2}>TOTAL QTY.</th>
-                                                    <th className="col-price" rowSpan={2}>LIST PRICE</th>
-                                                    <th className="col-price" rowSpan={2}>TOTAL LIST VALUE</th>
+                                                    {activeSchema.map(field => {
+                                                        if (field.key === 'size') {
+                                                            return <th key={field.key} colSpan={compSizes.length || 1} style={{ textAlign: 'center', borderBottom: '1px solid #e2e8f0' }}>{field.label.toUpperCase()}</th>;
+                                                        }
+                                                        return <th key={field.key} rowSpan={2}>{field.label.toUpperCase()}</th>;
+                                                    })}
                                                 </tr>
-                                                <tr>
-                                                    {SIZES.map(size => (
-                                                        <th key={size} style={{ fontSize: '0.85rem', width: '60px' }}>{size}</th>
-                                                    ))}
-                                                </tr>
+                                                {activeSchema.some(f => f.key === 'size') && compSizes.length > 0 && (
+                                                    <tr>
+                                                        {compSizes.map(size => (
+                                                            <th key={size} style={{ fontSize: '0.85rem', width: '60px' }}>{size}</th>
+                                                        ))}
+                                                    </tr>
+                                                )}
                                             </thead>
                                             <tbody>
                                                 {company.items.map(item => {
-                                                    const rowQty = getRowTotalQty(item.id);
+                                                    const rowQty = getRowTotalQty(item.id, compSizes);
                                                     const rowValue = rowQty * item.listPrice;
 
                                                     return (
@@ -304,26 +276,50 @@ export default function ProductDetail() {
                                                                     />
                                                                 </div>
                                                             </td>
-                                                            <td style={{ fontWeight: 'bold', verticalAlign: 'middle' }}>{item.macoNo}</td>
-                                                            <td className="suitable-cell">{item.suitableFor}</td>
-
-                                                            {SIZES.map(size => (
-                                                                <td key={size} className="qty-cell" style={{ padding: '4px' }}>
-                                                                    <input
-                                                                        type="number"
-                                                                        min="0"
-                                                                        value={quantities[`${item.id}-${size}`] || ''}
-                                                                        onChange={(e) => handleQuantityChange(item.id, size, e.target.value)}
-                                                                        className="qty-input"
-                                                                        placeholder="-"
-                                                                        style={{ width: '100%', padding: '4px', textAlign: 'center', margin: 0 }}
-                                                                    />
-                                                                </td>
-                                                            ))}
-
-                                                            <td style={{ fontWeight: 'bold', textAlign: 'center' }}>{rowQty > 0 ? rowQty : '-'}</td>
-                                                            <td style={{ textAlign: 'right' }}>{item.listPrice.toFixed(2)}</td>
-                                                            <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{rowValue > 0 ? rowValue.toFixed(2) : '-'}</td>
+                                                            {activeSchema.map(field => {
+                                                                if (field.key === 'maco_part_no') {
+                                                                    return <td key={field.key} style={{ fontWeight: 'bold', verticalAlign: 'middle' }}>{item.macoNo || item[field.key] || ''}</td>;
+                                                                }
+                                                                if (field.key === 'item_description') {
+                                                                    return <td key={field.key} className="suitable-cell">{item.suitableFor || item[field.key] || ''}</td>;
+                                                                }
+                                                                if (field.key === 'size') {
+                                                                    return compSizes.map(size => (
+                                                                        <td key={size} className="qty-cell" style={{ padding: '4px' }}>
+                                                                            <input
+                                                                                type="number"
+                                                                                min="0"
+                                                                                value={quantities[`${item.id}-${size}`] || ''}
+                                                                                onChange={(e) => handleQuantityChange(item.id, size, e.target.value)}
+                                                                                className="qty-input"
+                                                                                placeholder="-"
+                                                                                disabled={!selectedRows[item.id]}
+                                                                                style={{ 
+                                                                                    width: '100%', 
+                                                                                    padding: '4px', 
+                                                                                    textAlign: 'center', 
+                                                                                    margin: 0,
+                                                                                    backgroundColor: !selectedRows[item.id] ? '#f8fafc' : '#fff',
+                                                                                    cursor: !selectedRows[item.id] ? 'not-allowed' : 'text',
+                                                                                    border: '1px solid #e2e8f0'
+                                                                                }}
+                                                                            />
+                                                                        </td>
+                                                                    ));
+                                                                }
+                                                                if (field.key === 'total_qty') {
+                                                                    return <td key={field.key} style={{ fontWeight: 'bold', textAlign: 'center' }}>{rowQty > 0 ? rowQty : '-'}</td>;
+                                                                }
+                                                                if (field.key === 'list_price') {
+                                                                    return <td key={field.key} style={{ textAlign: 'right' }}>{(item.listPrice || 0).toFixed(2)}</td>;
+                                                                }
+                                                                if (field.key === 'total_list_value') {
+                                                                    return <td key={field.key} style={{ textAlign: 'right', fontWeight: 'bold' }}>{rowValue > 0 ? rowValue.toFixed(2) : '-'}</td>;
+                                                                }
+                                                                
+                                                                // Fallback for new custom fields
+                                                                return <td key={field.key} style={{ verticalAlign: 'middle' }}>{item[field.key] || '-'}</td>;
+                                                            })}
                                                         </tr>
                                                     );
                                                 })}

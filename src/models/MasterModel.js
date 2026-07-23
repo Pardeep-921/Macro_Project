@@ -16,5 +16,6 @@ export const MasterModel = {
     PrimaryGroups: createMasterEndpoints('primary-groups'),
     SubGroups: createMasterEndpoints('sub-groups'),
     ShippingCarriers: createMasterEndpoints('shipping-carriers'),
-    Products: createMasterEndpoints('products')
+    Products: createMasterEndpoints('products'),
+    ItemMasterSchema: createMasterEndpoints('item-master-schema')
 };

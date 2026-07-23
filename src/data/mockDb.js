@@ -30,6 +30,14 @@ const seedData = {
         { id: 11, fullname: 'Rohan Kapoor', email: 'rohan@demo-client.com', role: 'customer', status: 'pending' },
         { id: 12, fullname: 'Meera Shah', email: 'meera@demo-client.com', role: 'customer', status: 'pending' }
     ],
+    itemMasterSchema: [
+        { id: '1', key: 'maco_part_no', label: 'MACO PART NO.', type: 'text', required: true, order: 1 },
+        { id: '2', key: 'item_description', label: 'ITEM DESCRIPTION', type: 'text', required: false, order: 2 },
+        { id: '3', key: 'size', label: 'SIZE', type: 'text', required: false, order: 3, options: 'STD., 0.001, 0.002, 0.003, 0.004, 0.005' },
+        { id: '5', key: 'list_price', label: 'LIST PRICE', type: 'number', required: false, order: 4 },
+        { id: '6', key: 'total_qty', label: 'TOTAL QTY.', type: 'number', required: false, order: 5 },
+        { id: '7', key: 'total_list_value', label: 'TOTAL LIST VALUE', type: 'number', required: false, order: 6 }
+    ],
     companies: [
         {
             id: 1,
@@ -317,10 +325,100 @@ function loadDb() {
     try {
         const db = { ...clone(seedData), ...JSON.parse(saved) };
         let shouldSave = false;
+        
+        // Ensure total_qty and total_list_value exist in the schema
+        if (db.itemMasterSchema) {
+            const hasTotalQty = db.itemMasterSchema.some(f => f.key === 'total_qty');
+            const hasTotalListValue = db.itemMasterSchema.some(f => f.key === 'total_list_value');
+            
+            if (!hasTotalQty || !hasTotalListValue) {
+                if (!hasTotalQty) {
+                    db.itemMasterSchema.push({ id: `auto_${Date.now()}_1`, key: 'total_qty', label: 'TOTAL QTY.', type: 'number', required: false, order: 5 });
+                }
+                if (!hasTotalListValue) {
+                    db.itemMasterSchema.push({ id: `auto_${Date.now()}_2`, key: 'total_list_value', label: 'TOTAL LIST VALUE', type: 'number', required: false, order: 6 });
+                }
+                shouldSave = true;
+            }
+        }
+        
+        // Removed itemMasterSchema filter for total_qty and total_list_value
+
         if (!Array.isArray(db.products) || db.products.length === 0) {
             db.products = clone(seedData.products);
             shouldSave = true;
         }
+
+        const ROD_KITS = [
+            { brand: 'BAJAJ AUTO', items: [
+                { id: 2001, macoNo: 'BV-805', desc: 'BAJAJ VESPA 150cc', price: 324 },
+                { id: 2002, macoNo: 'BB-815', desc: 'BAJAJ XCD 125cc', price: 375 },
+                { id: 2003, macoNo: 'BD-879', desc: 'BAJAJ DISCOVER 100 T', price: 370 },
+                { id: 2004, macoNo: 'BP-943', desc: 'BAJAJ PULSAR 220 (BS6)', price: 536 },
+                { id: 2005, macoNo: 'BD-855', desc: 'BAJAJ DISCOVER 100cc', price: 370 },
+                { id: 2006, macoNo: 'BC-849', desc: 'BAJAJ CT-100/PLATINA', price: 450 },
+                { id: 2007, macoNo: 'BP-935', desc: 'BAJAJ PULSAR 150 (BS6)', price: 478 },
+                { id: 2008, macoNo: 'BC-925', desc: 'BAJAJ CT-110 (BS 6)', price: 370 },
+                { id: 2009, macoNo: 'BP-847', desc: 'BP DIGITAL METER 150cc', price: 478 },
+            ]},
+            { brand: 'HONDA', items: [
+                { id: 2010, macoNo: 'HS-816', desc: 'HONDA SHINE 125cc', price: 428 },
+                { id: 2011, macoNo: 'HA-875', desc: 'HONDA ACTIVA HET 110', price: 377 },
+                { id: 2012, macoNo: 'HU-955', desc: 'HONDA UNICORN 150cc', price: 428 },
+                { id: 2013, macoNo: 'HA-928', desc: 'HONDA ACTIVA 110 6G (BS6)', price: 377 },
+                { id: 2014, macoNo: 'HA-845', desc: 'HONDA ACTIVA 102cc', price: 369 },
+                { id: 2015, macoNo: 'HA-859', desc: 'HONDA ACTIVA N/M 110cc', price: 370 },
+            ]},
+            { brand: 'TVS MOTORS', items: [
+                { id: 2016, macoNo: 'TM-836', desc: 'TVS SUPER XL/HD 70cc', price: 205 },
+                { id: 2017, macoNo: 'TM-885', desc: 'TVS SUPER XL 4S', price: 423 },
+                { id: 2018, macoNo: 'TP-957', desc: 'TVS SCOOTY PEP PLUS 90cc', price: 370 },
+            ]},
+            { brand: 'HERO MOTOCORP', items: [
+                { id: 2019, macoNo: 'HH-956', desc: 'HH SUPER SPLENDOR', price: 373 },
+                { id: 2020, macoNo: 'HH-800', desc: 'HERO HONDA CD-100', price: 359 },
+                { id: 2021, macoNo: 'HH-921', desc: 'HERO HF DLX (BS6)', price: 370 },
+                { id: 2022, macoNo: 'HH-913', desc: 'HH SUPER SPLENDOR NEW', price: 423 },
+            ]},
+            { brand: 'SUZUKI', items: [
+                { id: 2023, macoNo: 'TA-899', desc: 'SUZUKI ACCESS 125cc/NEW', price: 395 },
+                { id: 2024, macoNo: 'TA-856', desc: 'SUZUKI ACCESS 125cc', price: 447 },
+            ]},
+            { brand: 'YAMAHA', items: [
+                { id: 2025, macoNo: 'EY-936', desc: 'YAMAHA RAY ZR 125 (BS 6)', price: 375 },
+            ]}
+        ];
+
+        ROD_KITS.forEach(kit => {
+            const brandId = `p8-${kit.brand.toLowerCase().replace(/\s+/g, '-')}`;
+            if (!db.subGroups.some(sg => sg.id === brandId)) {
+                db.subGroups.push({ id: brandId, name: kit.brand, primary_group_id: 'p8' });
+                shouldSave = true;
+            }
+            
+            kit.items.forEach(item => {
+                if (!db.products.some(p => p.id === item.id)) {
+                    db.products.push({
+                        id: item.id,
+                        itemCode: item.macoNo,
+                        item_code: item.macoNo,
+                        name: item.desc,
+                        item_name: item.desc,
+                        primary_group_id: 'p8',
+                        primaryGroupName: 'CONNECTING ROD KITS  FOR TWO-WHEELERS',
+                        sub_group_id: brandId,
+                        subGroupName: kit.brand,
+                        category: 'Industrial Spare Part 8',
+                        description: item.desc,
+                        specifications: item.desc,
+                        rate: item.price,
+                        list_price: item.price,
+                        mrp: item.price + 50
+                    });
+                    shouldSave = true;
+                }
+            });
+        });
         db.leads = (db.leads || []).map((lead, index) => {
             if (lead.createdAt) return lead;
             shouldSave = true;
@@ -397,6 +495,7 @@ function collectionName(entity) {
         categories: 'categories',
         units: 'units',
         sizes: 'sizes',
+        'item-master-schema': 'itemMasterSchema',
         'primary-items': 'primaryItems',
         'primary-groups': 'primaryGroups',
         'sub-groups': 'subGroups',

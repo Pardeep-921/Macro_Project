@@ -3,7 +3,7 @@ import PageHeader from '../../components/PageHeader';
 import Product from '../../components/Product';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/useAuth';
-import { useProductController } from '../../../controllers/ProductController';
+
 import { useMasterDataController } from '../../../controllers/MasterDataController';
 import { staticProducts } from '../../../data/marketplaceProducts';
 import './product-catalog.css';
@@ -24,19 +24,18 @@ const isHiddenLegacyMarketplaceItem = (product) => (
 );
 
 export default function ProductCatalog() {
-    const { products: apiProducts, loading: loadingProducts } = useProductController();
     const { data: primaryGroups, loading: loadingGroups } = useMasterDataController('PrimaryGroups');
     const { user } = useAuth();
     const navigate = useNavigate();
     const isAdmin = user?.role === 'admin';
 
-    const loading = loadingProducts || loadingGroups;
+    const loading = loadingGroups;
 
     // Deduplicate static products against edited primary groups
     const groupIds = new Set(primaryGroups.map(p => String(p.id)));
     const mergedStatic = staticProducts.filter(p => !groupIds.has(String(p.id)));
 
-    const products = [...primaryGroups, ...apiProducts, ...mergedStatic].filter(product => !isHiddenLegacyMarketplaceItem(product));
+    const products = [...primaryGroups, ...mergedStatic].filter(product => !isHiddenLegacyMarketplaceItem(product) && product.name && product.name.trim() !== '');
 
     const handleViewDetails = (product) => {
         const pathPrefix = window.location.pathname.startsWith('/admin') ? '/admin' : '/customer';
