@@ -35,6 +35,7 @@ function formatActivityTime(value) {
 export default function ActivityNotifications() {
     const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
+    const [refreshToken, setRefreshToken] = useState(0);
     const [readIds, setReadIds] = useState(() => {
         const readKey = `maco_notification_reads_${user?.username || user?.email || user?.role || 'guest'}`;
         try {
@@ -43,13 +44,24 @@ export default function ActivityNotifications() {
             return [];
         }
     });
+    const [deletedIds, setDeletedIds] = useState(() => {
+        const deletedKey = `maco_notification_deleted_${user?.username || user?.email || user?.role || 'guest'}`;
+        try {
+            return JSON.parse(localStorage.getItem(deletedKey) || '[]');
+        } catch {
+            return [];
+        }
+    });
     const [selectedActivity, setSelectedActivity] = useState(null);
     const panelRef = useRef(null);
     const readKey = `maco_notification_reads_${user?.username || user?.email || user?.role || 'guest'}`;
+    const deletedKey = `maco_notification_deleted_${user?.username || user?.email || user?.role || 'guest'}`;
 
     const activities = useMemo(
-        () => MockDb.getActivityNotifications({ role: user?.role, companyIdCode: user?.companyIdCode }),
-        [user?.role, user?.companyIdCode]
+        () => MockDb
+            .getActivityNotifications({ role: user?.role, companyIdCode: user?.companyIdCode })
+            .filter((activity) => !deletedIds.includes(activity.id)),
+        [user?.role, user?.companyIdCode, deletedIds, refreshToken]
     );
 
     const unreadCount = activities.filter((activity) => !readIds.includes(activity.id)).length;
@@ -60,11 +72,33 @@ export default function ActivityNotifications() {
         } catch {
             setReadIds([]);
         }
-    }, [readKey]);
+        try {
+            setDeletedIds(JSON.parse(localStorage.getItem(deletedKey) || '[]'));
+        } catch {
+            setDeletedIds([]);
+        }
+        setSelectedActivity(null);
+    }, [readKey, deletedKey]);
+
+    useEffect(() => {
+        const refresh = () => setRefreshToken((current) => current + 1);
+        const interval = window.setInterval(refresh, 5000);
+        window.addEventListener('maco_notifications_changed', refresh);
+        window.addEventListener('storage', refresh);
+        return () => {
+            window.clearInterval(interval);
+            window.removeEventListener('maco_notifications_changed', refresh);
+            window.removeEventListener('storage', refresh);
+        };
+    }, []);
 
     useEffect(() => {
         localStorage.setItem(readKey, JSON.stringify(readIds));
     }, [readIds, readKey]);
+
+    useEffect(() => {
+        localStorage.setItem(deletedKey, JSON.stringify(deletedIds));
+    }, [deletedIds, deletedKey]);
 
     useEffect(() => {
         if (!isOpen) return undefined;
@@ -103,12 +137,24 @@ export default function ActivityNotifications() {
         markAsRead(activityId);
     };
 
+    const handleDelete = (event, activityId) => {
+        event?.stopPropagation();
+        setDeletedIds((current) => (
+            current.includes(activityId) ? current : [...current, activityId]
+        ));
+        setReadIds((current) => (
+            current.includes(activityId) ? current : [...current, activityId]
+        ));
+        MockDb.deleteNotification(activityId);
+        if (selectedActivity?.id === activityId) setSelectedActivity(null);
+    };
+
     return (
         <>
             <div className="activity-notifications" ref={panelRef}>
                 <button
                     type="button"
-                    className="notification-trigger"
+                    className={`notification-trigger ${unreadCount > 0 ? 'has-unread' : ''}`}
                     onClick={handleToggle}
                     aria-label={`Activity notifications${unreadCount ? `, ${unreadCount} unread` : ''}`}
                     aria-expanded={isOpen}
@@ -161,15 +207,25 @@ export default function ActivityNotifications() {
                                                 </div>
                                                 <strong>{activity.title}</strong>
                                                 <p>{activity.message}</p>
-                                                {!isRead && (
+                                                <div className="notification-item-actions">
+                                                    {!isRead && (
+                                                        <button
+                                                            type="button"
+                                                            className="notification-read-btn"
+                                                            onClick={(event) => handleItemMarkRead(event, activity.id)}
+                                                        >
+                                                            Mark as read
+                                                        </button>
+                                                    )}
                                                     <button
                                                         type="button"
-                                                        className="notification-read-btn"
-                                                        onClick={(event) => handleItemMarkRead(event, activity.id)}
+                                                        className="notification-delete-btn"
+                                                        onClick={(event) => handleDelete(event, activity.id)}
+                                                        aria-label={`Delete notification: ${activity.title}`}
                                                     >
-                                                        Mark as read
+                                                        Delete
                                                     </button>
-                                                )}
+                                                </div>
                                             </div>
                                         </article>
                                     );
@@ -241,6 +297,9 @@ export default function ActivityNotifications() {
                         )}
 
                         <div className="notification-modal-actions">
+                            <button type="button" className="btn btn-secondary" onClick={(event) => handleDelete(event, selectedActivity.id)}>
+                                Delete
+                            </button>
                             <button type="button" className="btn btn-primary" onClick={() => setSelectedActivity(null)}>
                                 Close
                             </button>

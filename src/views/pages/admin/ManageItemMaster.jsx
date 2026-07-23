@@ -3,6 +3,14 @@ import PageHeader from '../../components/PageHeader';
 import { useMasterDataController } from '../../../controllers/MasterDataController';
 import { staticProducts } from '../../../data/marketplaceProducts';
 
+const DEFAULT_SIZE_OPTIONS = 'STD., 001, 002, 003, 004, 005';
+
+const normalizeSizeOptions = (options) => String(options || DEFAULT_SIZE_OPTIONS)
+    .split(',')
+    .map(option => option.trim().replace(/^0\.(\d{3})$/, '$1'))
+    .filter(Boolean)
+    .join(', ');
+
 export default function ManageItemMaster() {
     const { data: schema, handleSave: saveSchemaItem, handleDelete: deleteSchemaItem, refresh: refreshSchema } = useMasterDataController('ItemMasterSchema');
     const { data: masterItems, handleSave: saveProduct, handleDelete: deleteProduct, refresh: refreshProducts } = useMasterDataController('Products');
@@ -65,14 +73,14 @@ export default function ManageItemMaster() {
                     id: '', // force new ID
                     sub_group_id: subId,
                     primary_group_id: primaryId,
-                    options: s.key === 'size' && !s.options ? 'STD., 0.001, 0.002, 0.003, 0.004, 0.005' : s.options
+                    options: s.key === 'size' ? normalizeSizeOptions(s.options) : s.options
                 }));
             }
         } else {
             // global schema
             targetSchema = targetSchema.filter(s => !s.sub_group_id).map(s => ({
                 ...s,
-                options: s.key === 'size' && !s.options ? 'STD., 0.001, 0.002, 0.003, 0.004, 0.005' : s.options
+                options: s.key === 'size' ? normalizeSizeOptions(s.options) : s.options
             }));
         }
         setEditingSchema(targetSchema.sort((a, b) => a.order - b.order));
@@ -321,7 +329,7 @@ export default function ManageItemMaster() {
                                                                 {item.itemCode && field.key === 'maco_part_no' ? item.itemCode : ''}
                                                                 {item.name && field.key === 'item_description' ? item.name : ''}
                                                                 {item.listPrice && field.key === 'list_price' ? item.listPrice : ''}
-                                                                {field.key === 'size' ? field.options : (item[field.key] || '')}
+                                                                {field.key === 'size' ? normalizeSizeOptions(field.options) : (item[field.key] || '')}
                                                             </td>
                                                         ))}
                                                         <td style={{ textAlign: 'center' }}>
@@ -353,7 +361,7 @@ export default function ManageItemMaster() {
                                                         <td key={field.id} style={{ padding: '4px' }}>
                                                             {field.key === 'size' ? (
                                                                 <span style={{ fontSize: '12px', color: '#666', padding: '6px', display: 'block', textAlign: 'center' }}>
-                                                                    {field.options || 'STD., 0.001, 0.002, 0.003, 0.004, 0.005'}
+                                                                    {normalizeSizeOptions(field.options)}
                                                                 </span>
                                                             ) : (
                                                                 <input 
@@ -464,8 +472,8 @@ export default function ManageItemMaster() {
                                             <input 
                                                 type="text" 
                                                 value={field.options || ''} 
-                                                onChange={(e) => handleSchemaChange(index, 'options', e.target.value)}
-                                                placeholder="Options (e.g. STD., 0.001, 0.002)"
+                                                onChange={(e) => handleSchemaChange(index, 'options', normalizeSizeOptions(e.target.value))}
+                                                placeholder="Options (e.g. STD., 001, 002)"
                                                 style={{ ...modalStyles.input, flex: '2' }}
                                                 title="Comma separated list of options (used for generating sizes)"
                                             />

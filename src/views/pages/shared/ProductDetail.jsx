@@ -7,7 +7,9 @@ import './product-detail.css';
 
 const getProductName = (product) => product?.name || product?.item_name || 'Product';
 
+const DEFAULT_SIZE_OPTIONS = ['STD.', '001', '002', '003', '004', '005'];
 
+const normalizeSizeLabel = (value) => String(value || '').trim().replace(/^0\.(\d{3})$/, '$1');
 
 
 
@@ -42,8 +44,8 @@ export default function ProductDetail() {
 
         const sizeField = sorted.find(f => f.key === 'size');
         const sizes = sizeField?.options 
-            ? sizeField.options.split(',').map(s => s.trim()).filter(Boolean)
-            : ['STD.', '0.001', '0.002', '0.003', '0.004', '0.005'];
+            ? sizeField.options.split(',').map(normalizeSizeLabel).filter(Boolean)
+            : DEFAULT_SIZE_OPTIONS;
 
         return { schema: sorted, sizes };
     };
@@ -142,6 +144,7 @@ export default function ProductDetail() {
                             category: product?.category || 'Connecting Rod Kits',
                             size: size,
                             size_id: `${item.id}-${size}`,
+                            sizeOptions: compSizes,
                             qty: qty,
                             price: item.listPrice,
                             uom: 'PCS',

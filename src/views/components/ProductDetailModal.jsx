@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const SIZES = ['STD', '001', '002', '003', '004', '005'];
+const SIZES = ['STD.', '001', '002', '003', '004', '005'];
 
 export default function ProductDetailModal({ product, onClose, onAdd }) {
     const [selections, setSelections] = useState(

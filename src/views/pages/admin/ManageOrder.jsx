@@ -78,9 +78,19 @@ export default function ManageOrder() {
     };
 
     const downloadPdf = async (order) => {
-        const res = await fetchOrderDetails(order.orderNo);
-        if (res.success) PDFService.generateInvoice(order, res.items);
-        else alert(res.message || 'Unable to download PDF');
+        const orderNo = order.orderNo || order.order_no;
+        const res = await fetchOrderDetails(orderNo);
+        if (!res.success) return alert(res.message || 'Unable to download PDF');
+
+        const customer = customers.find(item => String(item.id) === String(order.company_id));
+        PDFService.generatePurchaseOrder({
+            ...customer,
+            ...order,
+            orderNo,
+            companyName: order.customer || customer?.name || customer?.company_name,
+            yourOrderNo: order.requisition || order.requisition_no,
+            poDate: order.poDate || order.po_date
+        }, res.items);
     };
 
     const formatDate = (value) => {

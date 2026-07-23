@@ -1,6 +1,7 @@
 import { staticProducts } from './marketplaceProducts';
 
 const STORAGE_KEY = 'maco_demo_db_v3';
+const NOTIFICATION_EVENT = 'maco_notifications_changed';
 
 const today = new Date().toISOString().split('T')[0];
 
@@ -33,7 +34,7 @@ const seedData = {
     itemMasterSchema: [
         { id: '1', key: 'maco_part_no', label: 'MACO PART NO.', type: 'text', required: true, order: 1 },
         { id: '2', key: 'item_description', label: 'ITEM DESCRIPTION', type: 'text', required: false, order: 2 },
-        { id: '3', key: 'size', label: 'SIZE', type: 'text', required: false, order: 3, options: 'STD., 0.001, 0.002, 0.003, 0.004, 0.005' },
+        { id: '3', key: 'size', label: 'SIZE', type: 'text', required: false, order: 3, options: 'STD., 001, 002, 003, 004, 005' },
         { id: '5', key: 'list_price', label: 'LIST PRICE', type: 'number', required: false, order: 4 },
         { id: '6', key: 'total_qty', label: 'TOTAL QTY.', type: 'number', required: false, order: 5 },
         { id: '7', key: 'total_list_value', label: 'TOTAL LIST VALUE', type: 'number', required: false, order: 6 }
@@ -328,6 +329,14 @@ function loadDb() {
         
         // Ensure total_qty and total_list_value exist in the schema
         if (db.itemMasterSchema) {
+            db.itemMasterSchema = db.itemMasterSchema.map(field => {
+                if (field.key !== 'size' || !field.options) return field;
+                const options = normalizeSizeOptions(field.options);
+                if (options === field.options) return field;
+                shouldSave = true;
+                return { ...field, options };
+            });
+
             const hasTotalQty = db.itemMasterSchema.some(f => f.key === 'total_qty');
             const hasTotalListValue = db.itemMasterSchema.some(f => f.key === 'total_list_value');
             
@@ -446,6 +455,22 @@ function saveDb(db) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
 }
 
+function normalizeSizeLabel(value) {
+    return String(value || '').trim().replace(/^0\.(\d{3})$/, '$1');
+}
+
+function normalizeSizeOptions(options) {
+    return String(options || '')
+        .split(',')
+        .map(option => normalizeSizeLabel(option))
+        .filter(Boolean)
+        .join(', ');
+}
+
+function notifyListeners() {
+    window.dispatchEvent(new CustomEvent(NOTIFICATION_EVENT));
+}
+
 function nextId(rows) {
     const maxId = Math.max(0, ...rows.map(row => Number(row.id) || 0));
     // If maxId is very small (e.g. they deleted all default items), jump to a high timestamp-based ID
@@ -484,6 +509,62 @@ function currentCompany(db) {
     return db.companies.find(company => company.companyId === user?.companyIdCode) || db.companies[0];
 }
 
+function notificationId(prefix) {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function addNotification(db, notification) {
+    const next = {
+        id: notification.id || notificationId(notification.type || 'activity'),
+        type: notification.type || 'system',
+        audienceRole: notification.audienceRole || 'admin',
+        audienceCompanyId: notification.audienceCompanyId || null,
+        createdAt: notification.createdAt || new Date().toISOString(),
+        relatedKey: notification.relatedKey || null,
+        title: notification.title,
+        message: notification.message,
+        details: notification.details || null
+    };
+    db.notifications = [next, ...(db.notifications || [])].slice(0, 80);
+    return next;
+}
+
+function buildOrderNotificationDetails(db, order) {
+    const orderNo = order.orderNo || order.order_no;
+    const money = (value) => `Rs. ${Number(value || 0).toLocaleString('en-IN')}`;
+    return {
+        heading: 'Order Details',
+        rows: [
+            ['Order No.', orderNo],
+            ['Customer', order.customer || 'Customer'],
+            ['Status', normalizeOrderStatus(order.status || order.order_status)],
+            ['Requisition No.', order.requisition || order.requisition_no || '-'],
+            ['PO Date', order.poDate || order.po_date || '-'],
+            ['Review Date', order.acceptDate || order.review_date || '-'],
+            ['Destination', order.destination || '-'],
+            ['Payment Status', order.paymentStatus || '-'],
+            ['Tracking No.', order.trackingNo || '-'],
+            ['Amount', money(order.amount || order.net_amount)]
+        ],
+        items: db.orderItems?.[orderNo] || []
+    };
+}
+
+function buildSupplyNotificationDetails(supply) {
+    return {
+        heading: 'Supply Details',
+        rows: [
+            ['Challan No.', supply.challanNo || supply.challan_no || '-'],
+            ['Order No.', supply.orderNo || supply.order_no || '-'],
+            ['Customer', supply.companyName || 'Customer'],
+            ['Carrier', supply.carrierName || '-'],
+            ['Challan Date', supply.challanDate || supply.challan_date || '-'],
+            ['Quantity', supply.quantity || '-'],
+            ['Supply Details', supply.supplyDetails || '-']
+        ]
+    };
+}
+
 function filterByText(rows, search, fields) {
     const query = String(search || '').trim().toLowerCase();
     if (!query) return rows;
@@ -519,6 +600,13 @@ function buildActivityNotifications(db, viewer = {}) {
         ? db.supplies.filter(supply => supply.companyId === companyIdCode)
         : db.supplies;
     const money = (value) => `Rs. ${Number(value || 0).toLocaleString('en-IN')}`;
+    const explicitNotifications = (db.notifications || []).filter((notification) => {
+        const audienceRole = String(notification.audienceRole || '').toLowerCase();
+        if (audienceRole !== role) return false;
+        if (!isCustomer) return true;
+        return !notification.audienceCompanyId || notification.audienceCompanyId === companyIdCode;
+    });
+    const explicitRelatedKeys = new Set(explicitNotifications.map(notification => notification.relatedKey).filter(Boolean));
     const describeCustomerOrder = (order) => {
         const status = normalizeOrderStatus(order.status || order.order_status);
         const orderNo = order.orderNo || order.order_no;
@@ -547,6 +635,7 @@ function buildActivityNotifications(db, viewer = {}) {
     };
 
     const activities = [
+        ...explicitNotifications,
         ...(!isCustomer
             ? (db.pendingUsers || []).map(user => ({
                 id: `registration-${user.id}`,
@@ -556,7 +645,7 @@ function buildActivityNotifications(db, viewer = {}) {
                 createdAt: user.createdAt || '2026-07-17T10:15:00.000Z'
             }))
             : []),
-        ...visibleOrders.map(order => {
+        ...visibleOrders.filter(order => !explicitRelatedKeys.has(`order:${order.orderNo || order.order_no}`)).map(order => {
             const orderNo = order.orderNo || order.order_no;
             const customerCopy = describeCustomerOrder(order);
             return {
@@ -585,7 +674,7 @@ function buildActivityNotifications(db, viewer = {}) {
                 }
             };
         }),
-        ...visibleSupplies.map(supply => ({
+        ...visibleSupplies.filter(supply => !explicitRelatedKeys.has(`supply:${supply.challanNo || supply.challan_no}`)).map(supply => ({
             id: `supply-${supply.challanNo || supply.challan_no}`,
             type: 'supply',
             title: isCustomer ? `Supply update for ${supply.orderNo || supply.order_no}` : `Challan ${supply.challanNo || supply.challan_no} uploaded`,
@@ -890,17 +979,39 @@ export const MockDb = {
         return buildActivityNotifications(loadDb(), viewer);
     },
 
+    deleteNotification(id) {
+        const db = loadDb();
+        db.notifications = (db.notifications || []).filter(notification => notification.id !== id);
+        saveDb(db);
+        notifyListeners();
+        return { success: true };
+    },
+
     updateOrder(orderNo, data) {
         const db = loadDb();
         const order = db.orders.find(item => item.orderNo === orderNo);
         if (!order) return { success: false, message: 'Order not found' };
+        const previousStatus = normalizeOrderStatus(order.status || order.order_status);
         const nextStatus = normalizeOrderStatus(data.status || order.status);
         Object.assign(order, data, {
             status: nextStatus,
             order_status: orderStatusCode(nextStatus),
-            ...(nextStatus === 'Accepted' || nextStatus === 'Rejected' ? { acceptDate: data.acceptDate || order.acceptDate || today } : {})
+            ...(nextStatus === 'Accepted' || nextStatus === 'Rejected' ? { acceptDate: data.acceptDate || order.acceptDate || today, review_date: new Date().toISOString() } : {})
         });
+        if ((nextStatus === 'Accepted' || nextStatus === 'Rejected') && previousStatus !== nextStatus) {
+            const company = db.companies.find(item => Number(item.id) === Number(order.company_id));
+            addNotification(db, {
+                type: 'order',
+                audienceRole: 'customer',
+                audienceCompanyId: company?.companyId || company?.company_id_code,
+                relatedKey: `order:${order.orderNo || order.order_no}`,
+                title: `Order ${order.orderNo} ${nextStatus.toLowerCase()}`,
+                message: `Admin ${nextStatus.toLowerCase()} your order worth Rs. ${Number(order.amount || order.net_amount || 0).toLocaleString('en-IN')}.`,
+                details: buildOrderNotificationDetails(db, order)
+            });
+        }
         saveDb(db);
+        notifyListeners();
         return { success: true, order };
     },
 
@@ -943,7 +1054,16 @@ export const MockDb = {
             size: item.size,
             uom: item.uom
         }));
+        addNotification(db, {
+            type: 'order',
+            audienceRole: 'admin',
+            relatedKey: `order:${orderNo}`,
+            title: `${company.name || 'Customer'} placed ${orderNo}`,
+            message: `New pending order worth Rs. ${amount.toLocaleString('en-IN')} is waiting for approval.`,
+            details: buildOrderNotificationDetails(db, order)
+        });
         saveDb(db);
+        notifyListeners();
         return { success: true, orderNo, order };
     },
 
@@ -1048,7 +1168,17 @@ export const MockDb = {
         order.status = 'Dispatched';
         order.order_status = 'DISPATCHED';
         order.trackingNo = challanNo;
+        addNotification(db, {
+            type: 'supply',
+            audienceRole: 'customer',
+            audienceCompanyId: company?.companyId || company?.company_id_code,
+            relatedKey: `supply:${challanNo}`,
+            title: `Challan ${challanNo} created`,
+            message: `Admin created challan ${challanNo} for your order ${order.orderNo}.`,
+            details: buildSupplyNotificationDetails(supply)
+        });
         saveDb(db);
+        notifyListeners();
         return { success: true, challan: supply };
     },
 

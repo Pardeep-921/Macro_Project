@@ -81,6 +81,22 @@ export const useProductController = () => {
         }));
     };
 
+    const updateCartItemSize = (cartId, nextSize) => {
+        setCart(prev => prev.map(item => {
+            if (item.cartId !== cartId) return item;
+
+            const baseName = String(item.name || '').replace(/\s*\([^()]*\)\s*$/, '');
+            return {
+                ...item,
+                name: baseName ? `${baseName} (${nextSize})` : item.name,
+                size: nextSize,
+                size_id: item.item_id ? `${item.item_id}-${nextSize}` : item.size_id,
+                cartId: `${item.item_id || item.id}-${nextSize}-${Date.now()}`,
+                total: item.qty * item.price
+            };
+        }));
+    };
+
     const clearCart = () => {
         setCart([]);
         localStorage.removeItem('maco_po_cart');
@@ -95,6 +111,7 @@ export const useProductController = () => {
         addMultipleToCart,
         removeFromCart,
         updateCartItemQuantity,
+        updateCartItemSize,
         clearCart
     };
 };
